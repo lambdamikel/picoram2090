@@ -28,7 +28,7 @@ for the Microtronic. Note that the Microtronic doesn't utilize the
 in addition to the 10 address lines (`A0` to `A9`) and 4 
 data lines (`IO/1` to `IO/4`).
 
-![Schematics](pics/schematics.png) 
+![Schematics](pics/schematics.jpg) 
 
 ## Hardware Setup 
 
