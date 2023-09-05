@@ -51,10 +51,16 @@ plug in very firmly and permantely into these.
 
 ![DIP Socket](pics/dipsocket.jpg)
 
-You'll need 3.3V to 5V (TTL) level shifters. I simply used this
-[FREENOVE Breakout Board for Raspberry Pi
+**You'll need 3.3V to 5V (TTL) level converters.***
+
+For this setup, I simply used a [FREENOVE Breakout Board for Raspberry
+Pi
 Pico](https://www.amazon.com/dp/B0BFB53Y2N?psc=1&ref=ppx_yo2ov_dt_b_product_details)
-which already has level shifters on board.
+which **I thought** already had level shifters on board, but this
+turns out to be not the case! **So you should still add level
+converters; this setup is probably not entirely safe and might damage
+the Pico in the long run.**
+
 
 ![Schematics](pics/dropin.jpg) 
 
