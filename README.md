@@ -81,3 +81,10 @@ method.
 [Emulating (S)RAM with the Raspberry Pi
 Pico!](https://youtu.be/j5Tbw8vmk-s)
 
+## Future Plans / Next Steps 
+
+- add a display and enable save & load of SRAM images to EEPROM / SDCard, turning this into a powerfull SRAM-image based mass storage solution (no more cassette interface needed for saving and loading Microtronic programs) 
+- add capability to select different SRAM banks using Microtronic's digitial output ports, turning this into a banked memory expansion for the Microtronic offering up to 15x more RAM
+
+
+
