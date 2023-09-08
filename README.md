@@ -65,6 +65,79 @@ might damage your Pico in the long run.**
 
 ![Schematics](pics/breakoutboard.jpg) 
 
+## A Safer Version with Level Converters  
+
+Whereas the version without the level shifters works, it is probably
+not the safest option for Pico longevity. Looking at the oscilloscope,
+the peak voltage levels are indeed much too high. Even though the Pico
+doesn't seem to care too much (it was running for hours without
+damage), it's well out of spec, and probably it won't last very long
+like this:
+
+![Without Conversion 1](pics/without1.jpg) 
+
+![Without Conversion 2](pics/without2.jpg) 
+
+Hence, *level shifters!* 
+
+I experimented quite a bit with various 3.3 - 5.5 V active level
+shifters, utilizing the *TXS0108E chip* as well as the ones with
+*discrete MOS-fets and pull-up resistors.* **None of them worked for
+the Microtronic!**
+
+I eventually realized that this is due to the unusual hardware setup
+in the Microtronic. See, the TMS1600 GPIO lines that address the 2114
+(inputs into `A0` to `A9`) are also used for multiplexing the 7segment LED
+display, as well as for keyboard matrix scanning!
+
+Moreover, there is no CS signal which would allow me to distinguish
+the "real" RAM accesses on `O0 - O3, R1 - R5` from the "inadvertent"
+accesses that occur due to LED display and keyboard scanning
+activity. In fact, the 2114 just outputs its data for these
+"addresses" as well, but they are simply ignored (after all, the
+firmware of the Microtronic knows when to read the addressed RAM, and
+when not to).
+
+One can see in the Schematics that the output lines specifying the
+addresses for the 2114, `O0 - O3, R1 - R5`, are connected to 33 kOhm
+pull-down resistors. The electrical levels I got from the
+off-the-shelf level converters simply were not compatible with that -
+these level converters feature a 5V pull-up resistor, pulling these
+lines to high, whereas the pull-down resistors on the Microtronic are
+doing the opposite.
+
+Encouraged by discussions with a fellow retro-enthusiast (thanks to
+Hans, again), I decided to go with simple voltage dividers for these
+address lines instead. I started with the standard 1k-2k divider, but
+this caused the LED display to malfunction - segments were now
+lightning up when they were not supposed to. To match the existing 33
+kOhm pull-down resistors, we then found a 10k-20k divider which solved
+the problem for the address lines.
+
+I then tried the same 10k-20k divider for the data
+lines. Unfortunately, the resulting data output signals from the Pico
+were then unreadable by the TMS1600. Even though the voltage levels
+were right, it seemed that the signal currents were now too low. I
+hence exchanged these with 1k-2k dividers, and finally everything
+started to work properly - resistor hell!
+
+The peak-to-peak voltage levels are still a bit too high (~ 3.6 V),
+but we are getting there. I can do one more round of "resistor
+tuning":
+
+![With Conversion 1](pics/with1.jpg) 
+
+![With Conversion 2](pics/with2.jpg) 
+
+This is obviously resistor / voltage-divider hell, but it's only an
+experimental breadboard, and I am going to design a proper PCB at some
+point when the project is ripe, and the planned features (see below)
+have been implemented. It's going to be a real product, eventually.
+
+I feel much more comfortable with the voltage dividers in place
+now. This should protect the Pico sufficently.
+
+
 ## Firmware
 
 Checkout
