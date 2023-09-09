@@ -30,6 +30,13 @@ data lines (`IO/1` to `IO/4`).
 
 ![Schematics](pics/schematics.jpg) 
 
+
+## Latest News
+
+- 9/8/2023: Thanks to Hackster.io for [this tweet](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) - nice!
+![Hackster Tweet](pics/hackster.jpg) 
+
+
 ## Hardware Setup 
 
 The wiring goes as follows:
