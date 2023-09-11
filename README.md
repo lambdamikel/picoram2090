@@ -33,6 +33,11 @@ data lines (`IO/1` to `IO/4`).
 
 ## Latest News
 
+- 10/8/2023: Thanks to Hackaday's [Robin Kearey](https://hackaday.com/author/robinkearey/) for covering the project - [great article!](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/)
+
+![Hackaday 1](pics/hackaday1.jpg)
+![Hackaday 2](pics/hackaday2.jpg)
+
 - 9/8/2023: Thanks to Hackster.io for [this tweet](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) - nice!
 ![Hackster Tweet](pics/hackster.jpg) 
 
