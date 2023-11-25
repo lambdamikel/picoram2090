@@ -132,22 +132,6 @@ a necessary condition for identifying the current Microtronic 12bit
 instruction word is the following: 
 
 ```
-	if (adr4) { 
-	  if (adr & (1 << 8)) {
-	    if (adr3 & (1 << 9)) {
-	      if ( (adr & adr3 ) == adr4) {                    
-		m_adr = adr4 & 0xff;
-		if (! reg_load_active ) {
-		  gpio_put(LED_PIN, 1);		
-		  m_op1 = ram[cur_bank][adr4];
-		  m_op2 = ram[cur_bank][adr3];
-		  m_op3 = ram[cur_bank][adr];
-		}
-	      }
-	    }
-	  }
-	}
-
 	  if (adr & (1 << 8)) {
 	    if (adr3 & (1 << 9)) {
 	      if ( (adr & adr3 ) == adr4) {                    
@@ -347,7 +331,11 @@ Power to the PicoRAM is supplies either directly from the Microtronic
 (`2090 VCC`), or from an optional, external stabilized standard 5V
 power supply with positive tipp / center polarity (`EXT VCC`). The
 LEDs `2090 VCC` and `EXT VCC` indicate which power sources are
-available.  Note that the `EXT VCC` LED will not come on if you have
+available.
+
+![Power Options](pics/power-options.jpg)
+
+Note that the `EXT VCC` LED will not come on if you have
 the wrong polarity! In this case, *do not power on the PicoRAM*!
 External VCC is *not* fed into the Microtronic - only GND is shared.
 Use the `SEL VCC` switch to determine the power source. Usually, the
