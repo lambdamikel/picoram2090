@@ -58,7 +58,7 @@ It offers:
   greatly facilitates programming, debugging, and learning the
   Microtronic machine language.
 
-- Harware extensions: speech synthesis (DECtalk-based), battery
+- Hardware extensions: speech synthesis (DECtalk-based), battery
   backed-up Real Time Clock (DS3231 RTC), monophonic sound, ASCII text
   and even graphics output on the OLED display. Extended "vacuous"
   op-codes (see below) are used to access the extensions.
@@ -84,7 +84,7 @@ It offers:
 ### 2114 SRAM Emulation 
 
 PicoRAM 2090 plugs into the 2114 SRAM socket of the Microtronic. The
-2114 has a capactiy of 1024 4bit words, i.e., it has a 10bit address
+2114 has a capacity of 1024 4bit words, i.e., it has a 10bit address
 bus and a 4bit data bus. The tristate (HighZ) capability of the 2114
 is not utilized by the the Microtronic, so CS is not connected. 
 
@@ -112,7 +112,7 @@ port and `4` bits from the `O` port), which are also shared with the
 6-digit 7-segment LED display and keyboard! Since CS is not utilized
 by this design, it is challenging to distinguish Microtronic's SRAM
 accesses on these ports from keyboard scanning and display driving
-activitiy (see below). 
+activity (see below). 
 
 For the purpose of serving the RAM, the Pico just runs a tight loop
 and presents the content of its "memory array" on the 4 data lines as
@@ -133,7 +133,7 @@ the "real" SRAM accesses, but as explained, this is not an option in
 the Microtronic design.
 
 As for write requests, the situation is much simpler - we have a clear
-signal in form of the WE signal gowing low when to update the C array
+signal in form of the WE signal going low when to update the C array
 holding the memory contents. When this happens, PicoRAM simply stores
 the current 4bit value on the data lines (`L1`, `L2`, `L4`, `L8`) 
 into its memory C array.
@@ -152,7 +152,7 @@ changing the value of the "active bank" index variable:
 ```
 
 PicoRAM offers 16 user RAM banks that can be selected via the UI (`OK`
-button), or by programm (extended op-code `70x`). Moreover, a few
+button), or by program (extended op-code `70x`). Moreover, a few
 temporary banks are used for implementing and managing the extended
 op-codes (see below).
 
@@ -249,15 +249,15 @@ and note number to be played. The Pico then enters the "sound
 extension enabled" mode, and is now awaiting additional vacuous
 op-codes that specify these arguments. 
 
-To specify these operands / arguments literrally in the machine code
+To specify these operands / arguments literally in the machine code
 ("immediate" style), the vacuous op-codes `0xx`, mnemonic `MOV x->x`,
 are used: "copy content of register `x` (0 to F) onto
-inself". Depending on the number of nibbles `x` required as operands /
+itself". Depending on the number of nibbles `x` required as operands /
 arguments, 1 to 8 such nibbles `x` are supplied. For example, the
 op-code sequence `50D 011 022` plays note 2 from octave 1. 
 
 Specifying arguments directly (literally, immediately in code) via
-`0xx` op-codes is fast, but lacks flexbility - arguments can then not
+`0xx` op-codes is fast, but lacks flexibility - arguments can then not
 be computed at runtime! Since the Microtronic is a Harvard
 architecture, it is not possible to modify the program memory with a
 program. Registers have to be used instead if runtime computed
@@ -272,7 +272,7 @@ know the current value of a register?* Answer: *by temporarily
 "banking-in" a register interrogation program* that shows certain
 address access-pattern characteristic for register `x` having value
 `y`. The Microtronic's execution of this interrogation program is
-observed by the the Pico, from which it can then infer the current
+observed by the Pico, from which it can then infer the current
 value `y` of register `x` indirectly (a certain address is reached by
 the program that gives it away).
 
@@ -311,9 +311,9 @@ continues execution of the user program with the next instruction
 after `3Fx` as if nothing had happened.
 
 From the user program's point of view, this register interrogation
-process happened trasparently. However, it is quite slow - determining
+process happened transparently. However, it is quite slow - determining
 the current value of a register takes almost quarter of a second or
-so, as a few dozend operations have to be executed from the
+so, as a few dozen operations have to be executed from the
 interrogation program (the Microtronic is a very slow machine indeed;
 the TMS1600 is clocked at 500 kHz, and the Microtronic OS / firmware
 is a complex program). 
@@ -351,14 +351,14 @@ the Pico to 1 GHz!)
 
 This is the current list of extended op-codes; note that future
 firmware versions might contain additional sets (and different 
-sets might be selecteable from the UI).
+sets might be selectable from the UI).
 
 In the following, `<CHAR>`, `<NOTE>` and `<OCTAVE>` represent single
 bytes, in little endian order (a sequence of two nibbles: `<LOW>,
 <HIGH>`).  Moreover, all graphics coordinates `X,Y,X1,X2,Y1,Y2` are
 bytes and require 2 nibbles each. In contrast, `TX, TY` are text
-display cursor location (text screen colum / row coordinates), and
-only reguire a single nibble (`<LOW>`), or two nibbles (`<LOW>,
+display cursor location (text screen column / row coordinates), and
+only require a single nibble (`<LOW>`), or two nibbles (`<LOW>,
 `<LOW'>`):
 
 ---------------------------------------------------------------------------------------------
@@ -452,7 +452,7 @@ to operate PicoRAM.
 
 Power to the PicoRAM is supplies either directly from the Microtronic
 (`2090 VCC`), or from an optional, external stabilized standard 5V
-power supply with positive tipp / center polarity (`EXT VCC`). The
+power supply with positive center polarity (`EXT VCC`). The
 LEDs `2090 VCC` and `EXT VCC` indicate which power sources are
 available.
 
@@ -577,12 +577,12 @@ button down for about half a second before releasing it).
 
 The **button labels** are **indicative of their functions during file creation and file selection**: 
 
-- **in file load mode** (`UP` button) the `UP` and `DOWN` buttons are used
+- In **file load mode** (`UP` button) the `UP` and `DOWN` buttons are used
   to *select a file from the list of files* on the SD card. `OK` is used
   to confirm loading of the current file, whereas `CANCEL` is used to
   abort the load process.
 
-- in **file save mode** (`DOWN` button) the `UP` and `DOWN` buttons are
+- In **file save mode** (`DOWN` button) the `UP` and `DOWN` buttons are
   used to *determine the next ASCII character of the filename under
   constructions.* A short press of `NEXT/PREV` advances to the next
   character, and a longer press jumps back to the previous
@@ -693,7 +693,7 @@ re-selected (toggle through the memory banks with the `NEXT/PREV`
 button). The original user program bank has been restored.
 
 Note that your program will also "disappear" if you hit the
-`NEXT/PREV` button accidentially - simply re-select the original
+`NEXT/PREV` button accidentally - simply re-select the original
 memory bank, and your program will be back. 
 
 ## Example Programs Demonstrating Extended Op-Codes 
@@ -782,10 +782,10 @@ The 7 x 7 mm version doesn't fit the footprint.
 
 Moreover, I am using [Mounting
 Feet](https://www.amazon.com/gp/product/B07DHHS1Q8) and crimpable
-18-pin DIP rectangule cable assembly connectors (hard to find!).  But
+18-pin DIP rectangular cable assembly connectors (hard to find!).  But
 ordinary DuPont cables will also do.
 
-## Ackknowledgements
+## Acknowledgements 
 
 - Harry Fairhead for his [execellent
   book](https://www.amazon.com/gp/product/1871962056)
