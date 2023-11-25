@@ -310,9 +310,10 @@ little endian order and hence a sequence of two nibbles: `<LOW>,
 bytes and require 2 nibbles each. In contrast, `TX, TY` require one
 nibble only (text screen colum / row coordinates):
 
+
 ---------------------------------------------------------------------------------------------
 | Op-Code | # Operand / Argument Nibbles | Explanation                                      |
---------------------------------------------------------------------------------------------|
+|---------|------------------------------|--------------------------------------------------|
 | `0xx`   | 0                            | Enter Literal Data Nibble `x`                    |
 | `3Fx`   | 0                            | Enter Data Nibble from Register `x`              |
 | `500`   | 0                            | Hexadecimal Data Entry Mode                      | 
@@ -333,6 +334,7 @@ nibble only (text screen colum / row coordinates):
 | `50F`   | 1                            | Send <CHAR> to TTS (Speech Mode Only)            | 
 | `70x`   | 1                            | Select Memory Bank `x`                           | 
 ---------------------------------------------------------------------------------------------
+
 
 ## Operating Instructions
 
