@@ -826,6 +826,6 @@ troubleshooting!
 [**Dedicated to my late father, Rudolf Wessel (26.12.1929 - 15.10.2023).**](https://www.youtube.com/playlist?list=PLvdXKcHrGqhcdrr1Fnn6KJIw0YY-kwp3S)
 
 *R.I.P, Papa - I will always fondly remember the days following
-Christmas 1983 for which you and Mom got me the Microtronic, and we
+Christmas 1983 (for which you and Mom got me the Microtronic) when we
 entered the dauntingly big "Lunar Lander" program together. In loving
 memory!*
