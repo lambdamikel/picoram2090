@@ -1,182 +1,604 @@
 # PicoRAM 2090
 
-A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator for the Busch
-2090 Microtronic Computer System
+A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card Interface,
+and Multi-Expansion for the [Busch 2090 Microtronic Computer System from 1981](https://github.com/lambdamikel/Busch-2090)
 
-![Schematics](pics/dropin.jpg) 
+![PicoRAM 1](pics/picoram1.jpg)
+
+![PicoRAM 2](pics/picoram2.jpg)
+
+![Microtronic](pics/microtronic.jpg)
+
+## History of the Project  
+
+PicoRAM 2090 started out as [a simple project to emulate the
+Microtronic 2114 SRAM}(README-old.md) in early September 2023, and
+evolved into a powerful and versatile multi-expansion for the
+Microtronic. It reached its current state end of November 2023.
+
+As a contribution to the RetroChallenge 2023/10](https://www.retrochallenge.org/p/entrants-list-202310.html) I developed the firmware to maturity, still using the breadboard; see my [Hackaday IO page](https://hackaday.io/project/192655-picoram-2090) and [YouTube videos](https://www.youtube.com/playlist?list=PLvdXKcHrGqhd8HcGb5lirYrgMoVZjP5XO)).
+
+The project got covered by a number of sites: 
+
+- [Hackaday: Pi Pico Becomes SRAM For 1981 Educational Compute](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/) ![Hackaday Coverage](pics/hackaday2.jpg)
+- [Hackster: Michael Wessel Turns a Raspberry Pi Pico Into an Add-On for the Four-Bit Busch 2090 Microtronic SBC](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) [Hackster Coverage](pics/hackster.jpg)
+- [PiShop Blog: Pi Pico Becomes SRAM for 1981 Educational Computer](https://blog.pishop.co.za/pi-pico-becomes-sram-for-1981-educational-computer/)
+
 
 ## About
 
-This emulates the [2114
-SRAM](https://de.wikipedia.org/wiki/2114_(SRAM)) found in the [Busch
-2090 Microtronic Computer
-System](https://github.com/lambdamikel/Busch-2090) - it's a fully
-compatible "drop in" replacement.
+PicoRAM 2090 is the ultimate expansion for the Microtronic.
 
-![Microtronic](pics/microtronic.jpg) 
+It offers:
 
-The [2114](manuals/2114.pdf) was a popular and widely used 1024x4 Bit
-SRAM chip. It was used in many early arcade games from the late 1970s
-and early 1980s. Pinout:
+- SD card: loading and saving of programs (full SRAM memory dumps) and easy file exchange with the PC (FAT32 filesystem).
+- comfortable GUI: 5 buttons and OLED display 
+- 16 memory banks: the currently active memory bank can selected manually via the GUI or by program; each bank hosts a full Microtronic RAM-
+- mnemonics display: PicoRAM can show the current Microtronic instruction,
+  address, and even mnemonics on its OLED display. Various display modes
+  are offered - the mnemonics display greatly facilitates programming, 
+  debugging, and learning the Microtronic machine language. 
+- harware extensions: speech synthesis (DECtalk-based), battery backed-up Real Time Clock (RTC), monophonic sound, ASCII text and even graphics output on the OLED display. Extended "vacuous" op-codes (see below) are used to access the extensions.
+- full integration: for example, the Microtronic's "GET TIME" op-code (F06) is intercepted so that the actual time from the RTC is loaded instead of the Microtronic's (internal, not battery backed-up) clock. 
+- easy to install: requires only simple modifications to the Microtronic PCB. 
 
-![2114 Pinout](pics/2114.jpg) 
+## Demo Videos
 
-The Microtronic is a relatively slow educational 4bit microcomputer,
-so timing is not critical. A standard Pico is more than fast enough
-for the Microtronic. Note that the Microtronic doesn't utilize the
-`CS` (Chip Select) line of the 2114; only `WE` (Write Enable) is used
-in addition to the 10 address lines (`A0` to `A9`) and 4 
-data lines (`IO/1` to `IO/4`).
+[YouTube Breadboard Prototype Demo](https://youtu.be/U6LDjYz8LTk) 
 
-![Schematics](pics/schematics.jpg) 
+[YouTube Final PCB Demo](https://youtu.be/U6LDjYz8LTk)  
 
 
-## Latest News
+## Theory of Operation
 
-- 10/8/2023: Thanks to Hackaday's [Robin Kearey](https://hackaday.com/author/robinkearey/) for covering the project - [great article!](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/)
+### 2114 SRAM Emulation 
 
-![Hackaday 1](pics/hackaday1.jpg)
-![Hackaday 2](pics/hackaday2.jpg)
+PicoRAM 2090 plugs into the 2114 SRAM socket of the Microtronic. The
+2114 has a capactiy of 1024 4bit words, i.e., it has a 10 bit address
+bus and a 4 bit data bus. The tristate (HighZ) capability of the 2114
+is not utilized by the the Microtronic, so CE is not
+connected.
 
-- 9/8/2023: Thanks to Hackster.io for [this tweet](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) - nice!
-![Hackster Tweet](pics/hackster.jpg) 
+![SRAM 2114 Pinout](pics/2114.jpg)
+
+Interestingly, the "CPU" of the Microtronic, the TMS1600
+Microcontroller, does not really provide for external RAM or ROM
+memory, so the 2114 is connected via GPIO to the TMS1600:
+
+![Microtronic Schematics](pics/schematics.jpg)
+
+However, the WE (Write Enable) line is of course required to
+distinguish read from write accesses to memory.
+
+Microtronic's RAM is organized as 255 12bit words. Hence, three 2114
+memory locations are required to store one Microtronic word. This also
+leaves 256 memory locations unoccopied.
+
+As can be seen in the schematics, the "address" bus to the 2114 is
+just a general-purpose output port, and shared with the 6-digit
+7-segment display and keyboard. For the purpose of serving the RAM,
+the Pico just runs a tight loop and presents the content of its
+"memory array" on the 4 data lines as quickly as possible. It is not
+necessary to distinguish the addresses that correspond to "real SRAM"
+accesses from accesses that are caused by driving the display or from
+scanning the keyboard (the Microtronic 2114 SRAM is actually
+outputting data for these as well, but the firmware just ignored them
+whilst driving the display or keyboard - it of course knows whether it
+addressed the SRAM, the display, or the keyboard). Hence, the Pico is doing
+the same.
+
+Ideally, the CE signal would have been used to uniquely signal that
+the currently presented address is a true SRAM address meant to
+address memory, but as seen from the schematics, this is not the case,
+and also not necessary in this design. 
+
+As for write requests, we have a clear indiciation when to update the
+C array holding the memory contents in terms of the WE signal going
+low.  When this happens, PicoRAM stores the 4bit value presented on
+the data lines into its memory C array.  
+
+### Banked Memory
+
+Given that the Microtronic memory is just a big C array, it is
+straight-forward to support banked memory simply by adding one more
+index / dimension to this array: the bank number. Switching the
+currently active bank does not require any copying, but merely
+changing the value of the "active bank" variable.
+
+PicoRAM offers 16 banks that can be selected via the GUI (OK Button),
+or by programm (extended op-code `70x`), and a few temporary banks
+that are used for extended op-codes (see below).
+
+### Identifying the Current Instruction
+
+Identifying the 12bit instruction words that is currently addressed
+(executed, displayed, ...) by the Microtronic is not straight-forward.
+
+Even though the Pico sees all activity on the 10bit "address bus" and
+4bit "data bus" (bus in double quotes here because these "buses" are
+really just TMS1600 GPIO lines, and the CE signal of the 2114 is not
+utilized!) it is *not* straight-forward to distinguish true SRAM
+accesses for fetching the current instruction from "involuntarily"
+ones that happen as a side effect of driving the 7segment LED display
+or keyboard scanning activities of the Microtronic firmware (OS). 
+
+However, by monitoring the last four addresses on the address bus,
+a necessary condition for identifying the current Microtronic 12bit
+instruction word is the following: 
+
+```
+	if (adr4) { 
+	  if (adr & (1 << 8)) {
+	    if (adr3 & (1 << 9)) {
+	      if ( (adr & adr3 ) == adr4) {                    
+		m_adr = adr4 & 0xff;
+		if (! reg_load_active ) {
+		  gpio_put(LED_PIN, 1);		
+		  m_op1 = ram[cur_bank][adr4];
+		  m_op2 = ram[cur_bank][adr3];
+		  m_op3 = ram[cur_bank][adr];
+		}
+	      }
+	    }
+	  }
+	}
+
+	  if (adr & (1 << 8)) {
+	    if (adr3 & (1 << 9)) {
+	      if ( (adr & adr3 ) == adr4) {                    
+```
+
+where `adr` is the current address on the address bus,
+and  
+
+```
+      adr4 = adr3;   
+      adr3 = adr2; 
+      adr2 = adr1; 
+      adr1 = adr; 
+``` 
+
+is an "address window" of the last four addresses.
+
+If the Pico detects such a sequence of addresses on the address bus, 
+then this is a necessary condition for the Microtronic to access the
+12bit instruction at address `adr4`.
+
+Note that the three 4bit 2114 SRAM words that make up the 12bit
+Microtronic word are not at consecutive addresses in the 2114 SRAM,
+but utilize a set bit 8 and 9.
+
+Unfortunately, his mechanism does not work for the address `00`.
+Moreover, there are still "false positives" that are caused by display
+multiplexing! In principle, these are indistinguishable from real SRAM
+accesses from our external perspective - only the Microtronic firmware
+knows whether it is addressing the SRAM or multiplexing the display.
+
+To eliminate these false positives, and thus turn this condition into
+a *sufficient (and necessary) condition* for the current instruction,
+one more input signal from the TMS1600 is required: as can be seen in
+the schematics, the TMS1600 GPIO port `R12` is used to address / drive
+the individual six digits of the 7segment display. IF at least ONE of
+the six digits is being enbled by R12, then this signal can be used to
+identify display accesses and hence remove these false positives.
+PicoRAM hence requires the `R12 (DISP)` wire to robustly identify the
+current instruction (executed or on the monitor display). Without the
+extra `DISP` wire for robust operation; without it, it will still
+serve as SRAM emulator and SD card storage device, but extended
+op-codes and hardware extensions (sound, speech, text and graphics
+display, RTC) cannot be used.
+
+Moreover, the display CANNOT be turned off completely while the
+Microtronic program is running - programs that use the `F02 (DISPOUT)`
+op-code, and hence run without display output, cannot use extended
+op-codes. Extended op-codes (and hence the hardware extensions) can
+only be used when the Microtronic 7segment LED display is displaying
+something. Moreover, there can be no extended op-code at address `00`.
+These are not severe restrictions. 
+
+### Extended Op-Codes
+
+Vacuous, extended op-codes are used to access the hardware extensions.
+A vacuous op-code is a Microtronic op-code that does something, but
+basically boils down to a convoluted no-op. These op-codes are being
+executed by the Microtronic and leave the register contents
+unchanged; hence, no real Microtronic program is using them. PicoRAM
+monitors the current instruction, detects these special op-codes,
+and uses them to implement certain side effects.
+
+A simple example is the op-code `502`, `ADDI 0 to register 2`, which
+means "add zero to register 2".  This is semantically a no-op, a
+"vacuous" op-code. The PicoRAM detects this op-code and implements a
+special side effect semantics for it: *clear the OLED display.* 
+
+Many extended op-codes require operands though. For example,
+`50D` = `play note` initiates a sound output command. The Pico
+then enters the "sound extension enabled" mode, and is now
+awaiting additional vacuous op-codes that specify the note
+number to be played, as well as the octave (in reverse order).
+
+To specify these operands / arguments, the vacuous op-codes `0xx`,
+mnemonic `MOV x->x`, are used: "copy content of register `x` (0 to F)
+onto inself". Depending on the number of nibbles `x` required as
+operands / arguments to the currently active instruction, one to 8
+such nibbles `x` can be specified immediately, i.e., literally, in the
+code. For example, the sequence `50D 011 022` plays note 2 from octave
+1.
+
+Specifying arguments directly via `0xx` op-codes is fast, but lacks
+flexbility. Since the Microtronic is a Harvard architecture, it is not
+possible to modify the program memory with a program. Registers
+have to be used.
+
+In order to specify the value of a register as an operand / argument
+to an extended op-code, i.e., say we want to play note `x` in register
+0, we need a special trick. The problem is that PicoRAM does not have
+any access to the register memory! The registers are stored directly
+on the TMS1600 chip, and *not* in the 2114 SRAM. *So how can PicoRAM
+get to know the current value of a register?* Answer: by temporarily
+"banking-in" a register interrogation program that display a certain
+behavior characteristic for register x having content y. This behavior
+is observed by the Pico, and used to infer its current content
+indirectly. 
+
+The full technical explanation is complicated. But, in a nutshell, the
+following is happening. Suppose we want to supply the (maybe computed)
+note number to the `play tone`, `50D` op-code from register 0. We use
+the vacuous op-code `3Fx`, `ANDI F x` ("do a logical AND of the
+immediate value F with the content of register x") to mean "supply the
+content of register x as argument". 
+
+When the Pico detects `3Fx`, it immediately switches to a temporary
+memory bank, and then executes a JUMP to address 00 (`C00`). From
+there it then executes a "register interrogation program" - this
+program performs a binary search to determine the current register
+value.  Again, not that the Microtronic simply write the value into
+program memory.  It can, however, do a number of compares and
+conditional branches to determine the value via binary search. The
+Pico is able to observe the addresses that are reached whilst the
+Microtronic is executing this binary search "register interrogation
+program", and certain target addresses are reached for certain
+register values. The Pico is hence able to infer the register value of
+the interrogated register. After the register value has been inferred,
+a jump-back to the instruction after the original `3FX` is
+materialized in the temporary memory bank, and the original memory
+bank restablished, so that normal program execution continues.
+
+From the user program's point of view, this happens trasparently.
+However, it is quite slow - to determine the current value of a
+register takes almost half a second or so, as a few dozend operations
+have to be executed (and the Microtronic is a very slow machine).
+
+Note that immediate / code-supplied and register-supplied arguments
+can be combined. For example, here is a program that uses
+register 0 to supply the note number, but specifies the octave
+directly (immediate) in the code (address, op-code, and explanation):
+
+```
+00 F10 # display register 0 on display 
+01 50D # sound output op-code
+02 011 # supply value 1 (= octave 1) immediately 
+03 3F0 # use content of register 0 for note number 
+04 510 # increment register 0 
+05 C01 # jump to address 01 (50D, ...) 
+``` 
 
 
-## Hardware Setup 
+### Dual Core Operations
 
-The wiring goes as follows:
+The first core of the Pico is implementing the SRAM emulation, including bank-switching, identifying the current instruction, etc.
 
-- `GP2`..`GP11`: address lines `A0`..`A9` (input) 
-- `GP12`..`GP15`: data lines `IO/1`..`IO/4` (input/output)
-- `GP22`: Write Enable (`WE`), low active (input) 
+The second core is implementing the GUI, extended op-codes, access to
+the hardware extensions, etc.
 
-Simply connect the corresponding Pico `GP` ports to the corresponding
-2114 pins; in the original Microtronic, the 2114 is housed in a
-special (white) socket, so the chip is easily spotted:
+The Pico is overclocked to 250 Mhz (not a problem at all). 
 
-![White Socket](pics/socket.jpg)
+## List of Extended Op-Codes
 
-I recommend replacing this socket with a standard DIP socket so that
-the PicoRAM 2090 can be connected more easily. I simply used DuPont
-cables and a standard (machined) IC 18pin DIP socket; DuPont cables
-plug in very firmly and permantely into these.
+This is the current list of extended op-codes; note that future
+firmware versions might contain additional sets (different op-code
+sets might be selecteable from the GUI): 
+
+```
+   0xx ENTER LITERAL DATA x
+
+   3Fx ENTER DATA FROM REG x 
+
+   500 HEX DATA ENTRY MODE
+   501 DEC DATA ENTRY MODE
+   502 DISP CLEAR SCREEN 
+   503 DISP TOGGLE UPDATE  
+   504 DISP REFRESH
+   505 DISP CLEAR LINE <X> 
+   506 DISP SHOW CHAR <LOW><HIGH>
+   507 DISP CURSOR SET CURSOR LINE <X>
+   508 DISP SET CURSOR <X> <Y>
+   509 DISP PLOT <X> <Y> 
+   50A DISP LINE <X1> <Y1> <X2> <Y2>
+   50B DISP LINE FROM <X> <Y> 
+   50C DISP LINE TO   <X> <Y> 
+   50D SOUND PLAY NOTE <X><Y> (SOUND OFF FIRST) 
+   50E SPEAK DISP ECHO
+   50F SPEAK BYTE <LOW><HIGH>
+
+   70x SWITCH MEMORY BANK x
+``` 
+
+## Operating Instructions
+
+The following instructions should explain how 
+to operate PicoRAM. 
+
+### Power Supply 
+
+Power to the PicoRAM is supplies either directly from the Microtronic
+("2090 VCC"), or from an optional, external stabilized standard 5V
+power supply (positive tipp / center polarity ("EXT VCC"). The LEDs
+"2090 VCC" and "EXT VCC" indicate which power sources are available.
+Note that the "EXT VCC" LED will not come on if you have the wrong
+polarity! In this case, *do not power on the PicoRAM*! External VCC is
+*not* fed into the Microtronic - only GND is shared.  Use the "SEL
+VCC" button to select either power source. Usually, the Microtronic
+PSU is strong enough to drive PicoRAM, so an external extra PSU
+is really not required, but you may choose to use one to be on
+the safe side. 
+
+![PicoRAM 3](pics/picoram3.jpg)
+
+Before powering on the Microtronic, make sure PicoRAM 2090 is running!
+Turn on PicoRAM by pushing the POWER button.
+
+The PWR LED on the MikroE speech daugher board should come on immediately,
+as well as the OLED display. 
+
+### Audio 
+
+Use a standard mini stereo jack connector cable to connect the
+MikroE TextToSpeech click board to the "LINE IN" connector.
+Determine the VOLUME using the potentiometer.
+
+PicoRAM is equipped with a [PAM8403 Class D audio amplifier](https://www.ebay.com/itm/191855753895) powering a loudspeaker of your choice.
+
+![Speaker](pics/speaker.jpg)
+
+PicoRAM offers *either* TextToSpeech (TTS), using the MikroE click board, or sound (generated by
+the Pico itself). Unfortunately, only one at a time is possible due to a shortage of GPIO pins
+on the Pico.
+
+Use the switch labeled **TTS or SOUND** to select either. A push to
+the **RESET** button is required for the new mode to become effective.
+
+The current audio mode (SND or TTS) is also indicated in the OLED display:
+
+![Display Sound](pics/disp1.jpg)
+
+![Display TTS](pics/disp2.jpg)
+
+
+### Reset Button
+
+The **RESET** button resets the Pico and hence all emulated memory
+banks. Memory banks can be saved to SD card if required. 
+
+### SD Card
+
+Use a FAT32 formatted Micro SD Card. Note that `ERROR 2` will
+occur if PicoRAM is started without SD Card, or if the SD Card
+is write protected, not properly formatted, or faulty.
+
+### OLED Status Display & Display Modes 
+
+The PicoRAM OLED display looks as follows:
+
+![Display Explanation](pics/disp1.jpg)
+
+The first line shows
+
+- the current memory bank number the PicoRAM is serving: #0
+- the current address of the Microtronic: 00
+- the current 12bit instruction word / op-code: 000
+- the current audio mode: SND, TTS-, or TTSE. SND means sound output, else TTS is active. See the SOUND or TTS switch. TTSE means "TTS Echo", i.e., everything that is printed on the OLED is automatically sent to TTS (and uttered when an end-of-line character, CR or LF, is sent)
+- whether extended op-codes are enabled ("*") or disabled ("-") 
+
+The second line shows the current bank, address and instruction, but using mnemonics.
+
+The third line is shown when extended op-codes are enabled, and mostly usefull for single stepping and
+debugging. It shows the status and kind of currently executed / prepared extended op-code (i.e., op-code
+type and its arguments): 
+
+![Display Ex-Op Codes Explanation](pics/disp2.jpg)
+
+The fourth line is used for file operations, or for displaying the Real Time Clock current time etc.
+
+**Note that the display has various modes, and when the Microtronic is actually running a program, it
+should usually be turned off!** The display mode can be changed using the CANCEL button.
+
+It is important that the **display is switched off when a program with extended op-codes is running** -
+not only might the Microtronic program want to utilize the display for text or graphics output, but
+also from a performance point of view it can be critical to switch off the display so that the 2nd
+core does have all cycles available to implement the extended op-codes rather than spent time updating
+the display.
+
+Using the CANCEL button, the modes of the display are:
+
+- display off: this should be the default when the Microtronic is runnign a program with extended op-codes; updating the display requires cycles from the 2nd core which might then run at risk of running out of sync with the Microtronic. 
+- op-code display: first line only. 
+- op-code & mnemonics display: first and second line; the third line showing the extended op-codes status is displayed when extended op-codes are enabled. This should be the default for programm development and single stepping through and debugging of the Microtronic program.  
+
+### User Interface Buttons 
+
+![UI](pics/ui.jpg)
+
+The button legend list the button label and its **primary and secondary function.** The **primary function** corresponds to a short press of the button, and the **secondary function** is selected by a longer press of the button (i.e., about half a second).
+
+The **button labels** are **indicative of the functions that these buttons play during file creation and file selection**: 
+- in file load mode (UP button) the UP and DOWN buttons are used to select a file from the list of files on the SD card. OK is used to confirm loading of the current file,  whereas CANCEL is used to abort the load process. 
+- in file save mode (DOWN button) the UP and DOWN buttons are used to select the next character of the filename under constructions. A short press of NEXT/PREV advances to the next character, and a longer press jumps back to the previous character. OK and CANCEL are self-explanatory. The buttons have analog functions for setting the real time clock (see secondary function of CANCEL). 
+
+In a nutshell, the **primary functions of the buttons** are (if executed from the main loop / context of PicoRAM):
+
+- UP: Load a memory dump from SD card, using the file selector. 
+- DOWN: Save a memory dump to SD card, using the file name creator.
+- NEXT/PREV: Increment the current active memory bank number by 1; 16 banks are available. These banks are pre-loaded with some program, see below for the list. The currently active memory bank can simply be erased using Microtronic's standard clear memory procedure: `HALT-PGM-5` (or `HALT-PGM-6` for `NOP` op-codes). Note that this only affects the currently active bank! But all banks are reset to default contents upon reset of the PicoRAM (RESET button or power cycle). 
+- OK: En-/disable extended op-codes. When extended op-codes are enabled, PicoRAM acts as a "co-processor" and the already discussed vacuous op-codes are utilized to drive the hardware extension, i.e., for sound, speech, text or graphics output, and bank switching. A `*` in the display status line (first line) indicates if op-code extensions are active or not. When active, and a program is run, the OLED display should always be in off mode.
+- CANCEL: toggle OLED display mode (off, op-code display, op-code & mnemonics display).
+
+The **secondary functions of the buttons** are (if execute from the main loop / context of PicoRAM): 
+
+- UP/DOWN: Test the audio output (either sound or speech, depending on the mode). 
+- DOWN: List all the `.MIC` files on SD card.
+- NEXT/PREV: If in TTS mode, speak the current time of the RTC.
+- OK: Show the current time of the RTC on the OLED display.
+- CANCEL: Set the current time of the RTC using the OLED display.
+
+## Pre-Loaded Memory Banks / Programs
+
+The default / power-on memory bank programs are as follows. A `*`
+behind the bank number indicates that op-code extensions must be
+enabled for this program to work properly.
+
+All programs are started via `HALT-NEXT-0-0-RUN`: 
+
+-------------------------------------------------------------------------------
+| Bank # | Extended Op-Codes? | Description                                   |
+| ------ | ------------------ | --------------------------------------------- |
+| 0      | *                  | Demonstrates `F06 (GET TIME)` op-code via RTC | 
+| 1      |                    | 17+4 Blackjack                                |
+| 2      |                    | Nim Game                                      |
+| 3      |                    | Three Digit Counter                           | 
+| 4      |                    | Electronic Die (Random Generator from 1 to 6) |
+| 5      |                    | Three Digit Counter                           | 
+| 6      |                    | Scrolling LED Light ("Lauflicht")             | 
+| 7      |                    | Digital Input Port Test (DIN Op-Code)         | 
+| 8      |                    | Lunar Lander Game                             | 
+| 9      |                    | Prime Numbers                                 |
+| A      |                    | Tic Tac Toe                                   | 
+| B      |                    | Car Racing                                    |
+| C      |                    | Blockade                                      | 
+| D      | *                  | Regload Test Program                          | 
+| E      |                    | Empty                                         | 
+| F      |                    | Empty                                         |
+-------------------------------------------------------------------------------
+
+These programs may change without notice. 
+
+## Using PicoRAM with the Microtronic
+
+The standard operation sequence should look as follows:
+
+- load a memory dump from SD card using the UP botton; select a .MIC file using UP, DOWN, and OK / CANCEL. 
+- set the Microtronic to address 00: `HALT-NEXT-00`.
+- disable the OLED display using the CANCEL button.
+- ensure that extended op-codes are enabled: hit the OK button until `OP-EXT ON (*)` is shown.
+- start the Microtronic program: `HALT-NEXT-00-RUN`.
+- important: **when the Microtronic program has finished, DISABLE extended op-codes!**
+
+The last step is imporant because some of the extended op-codes may require banking-in of temporary,
+auxiliary program fragments. If the program is interrupted whilst interrupting one of these
+banked-in "helper" programs, then the Microtronic will appear to have a lost its original
+memory content. When this happens, and you don't find your program in memory, simply disable
+extended op-codes until (hit OK until `OP-EXT OFF (-)` is shown), and set the Microtronic monitor
+to a well-defined address: `HALT-NEXT-00`. Your program will immediately appear again, as the original
+user program bank has been restored.
+
+Note that your program will also "disappear" if you hit the NEXT/PREV
+buttons accidentially, i.e., the current memory bank has
+changed. Simply re-select your program's original memory bank by
+toggling through the 16 banks until the original bank is restored. 
+
+## Example Programs
+
+Example programs are [here.](software/) 
+
+## Schematics, Gerbers, and Firmware 
+
+![PicpRAM PCB](pics/pcb.jpg)
+![PicoRAM Schematics](schematics/picoram-schematics.jpg)
+
+Here you will find [the firmware](firmware/sram.uf2),
+the [PDF schematics](schematics/picoram-schematics.pdf),
+and the [Gerbers](gerbers/gerbers.zip).
+
+Firmware sources soon. 
+
+## Assembly Notes
+
+The Microtronic's 2114 SRAM socket must be replaced by a standard (ideally, machined) DIP socket:
+
+![SRAM Socket](pics/socket.jpg)
 
 ![DIP Socket](pics/dipsocket.jpg)
 
-**You'll need 3.3V to 5V (TTL) level converters.**
+Moreover, the `R12 (DISP)` line requires a pin-connector - there is a via 
+on the Microtronic PCB which can be used for this: 
 
-For this setup, I simply used a [FREENOVE Breakout Board for Raspberry
-Pi
-Pico](https://www.amazon.com/dp/B0BFB53Y2N?psc=1&ref=ppx_yo2ov_dt_b_product_details)
-which **I thought** already had level converters on board, but this
-turns out to be **not** the case (thanks, Hans!) **So you should still
-add level converters; this setup is probably not entirely safe and
-might damage your Pico in the long run.**
+![R12 Via](pics/r12via.jpg)
 
-![Schematics](pics/dropin.jpg) 
+The modified Microtronic PCB should look as follows then: 
 
-![Schematics](pics/breakoutboard.jpg) 
+![PicoRAM 5](pics/picoram5.jpg)
+ 
+PicoRAM is easy to assemble; everything is through-hole, and off-the-shelf modules are used.
 
-## A Safer Version with Level Converters  
+I recommend to use a machined DIP socket for the ribbon wire cable connector: 
 
-Whereas the version without the level shifters works, it is probably
-not the safest option for Pico longevity. Looking at the oscilloscope,
-the peak voltage levels are indeed much too high. Even though the Pico
-doesn't seem to care too much (it was running for hours without
-damage), it's well out of spec, and probably it won't last very long
-like this:
+![PicoRAM 4](pics/picoram4.jpg)
+![PicoRAM 5](pics/picoram5.jpg)
+![PicoRAM 6](pics/picoram6.jpg)
 
-![Without Conversion 1](pics/without1.jpg) 
+## Bill of Material
 
-![Without Conversion 2](pics/without2.jpg) 
+----------------------------------------------------------------------------------------------------------------------
+| Reference     | Description                                                                                        |
+| --------------| ---------------------------------------------------------------------------------------------------| 
+| C1            | 100 uF Polarized                                                                                   |
+| C2            | 100 nF                                                                                             |  
+| R1, R7, R8    | 2k Ohm                                                                                             |
+| R2            | 330 Ohm                                                                                            |
+| R3            | 620 Ohm                                                                                            |  
+| R4            | 1k Ohm                                                                                             |
+| R5            | 3.3k Ohm                                                                                           |
+| R6            | 120 Ohm                                                                                            |
+| RN1, RN2      | 20k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                               |
+| RN5           | 1k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                                |
+| RN6           | 2k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                                |
+| RV1           | 101 (100 Ohm) Potentiomer / Trimmer                                                                |
+| SW1, SW2, SW6 | [DPDT 8.5 mm Switch (GRAY, NOT BLUE!!)](https://www.amazon.com/dp/B081VB7LY2)                      |
+| D1, D2        | 3.0 mm LEDs                                                                                        |
+| J5            |[Stereo Socket](https://www.amazon.com/gp/product/B077D1NY4T)                                       |
+| LS1           | Loudspeaker                                                                                        |
+| J1, J2        | [PAM8403 Class D audio amplifier](https://www.ebay.com/itm/191855753895)                           |
+| Brd1          | [SSD1306 128x64 OLED Display](https://www.amazon.com/gp/product/B09C5K91H7/)                       |
+| U1            | [RTC DS3231](https://www.amazon.com/gp/product/B00LX3V7F0)                                         |
+| U2            | [Raspberry Pi Pico](https://www.amazon.com/Raspberry-Pi-Pico-RP2040-microcontroller/dp/B09437S9X4) |
+| U3            | [MIKROE-2253 TextToSpeech Click!](https://www.mikroe.com/text-to-speech-click)                     |
+| U4            | [AdaFruit MICROSD Module](https://www.adafruit.com/product/4682)                                   |
+| U5            | Machined Socket (DIP-18, W=7.62mm)                                                                 |
+----------------------------------------------------------------------------------------------------------------------
 
-Hence, *level shifters!* 
+For SW, SW2, SW6, note that the common pin of these switches needs to
+be in the middle! The Blue and Gray switches from Amazon are
+different - get the Gray ones!
 
-I experimented quite a bit with various 3.3 - 5.5 V active level
-shifters, utilizing the *TXS0108E chip* as well as the ones with
-*discrete MOS-fets and pull-up resistors.* **None of them worked for
-the Microtronic!**
+Moreover, I am using [Mounting
+Feet](https://www.amazon.com/gp/product/B07DHHS1Q8) and crimpable
+18-pin DIP rectangule cable assembly connectors (hard to find!).
+But ordinary DuPont cables will also do. 
 
-I eventually realized that this is due to the unusual hardware setup
-in the Microtronic. See, the TMS1600 GPIO lines that address the 2114
-(inputs into `A0` to `A9`) are also used for multiplexing the 7segment LED
-display, as well as for keyboard matrix scanning!
+## Ackknowledgements
 
-Moreover, there is no CS signal which would allow me to distinguish
-the "real" RAM accesses on `O0 - O3, R1 - R5` from the "inadvertent"
-accesses that occur due to LED display and keyboard scanning
-activity. In fact, the 2114 just outputs its data for these
-"addresses" as well, but they are simply ignored (after all, the
-firmware of the Microtronic knows when to read the addressed RAM, and
-when not to).
-
-One can see in the Schematics that the output lines specifying the
-addresses for the 2114, `O0 - O3, R1 - R5`, are connected to 33 kOhm
-pull-down resistors. The electrical levels I got from the
-off-the-shelf level converters simply were not compatible with that -
-these level converters feature a 5V pull-up resistor, pulling these
-lines to high, whereas the pull-down resistors on the Microtronic are
-doing the opposite.
-
-Encouraged by discussions with a fellow retro-enthusiast (thanks to
-Hans, again), I decided to go with simple voltage dividers for these
-address lines instead. I started with the standard 1k-2k divider, but
-this caused the LED display to malfunction - segments were now
-lightning up when they were not supposed to. To match the existing 33
-kOhm pull-down resistors, we then found a 10k-20k divider which solved
-the problem for the address lines.
-
-I then tried the same 10k-20k divider for the data
-lines. Unfortunately, the resulting data output signals from the Pico
-were then unreadable by the TMS1600. Even though the voltage levels
-were right, it seemed that the signal currents were now too low. I
-hence exchanged these with 1k-2k dividers, and finally everything
-started to work properly - resistor hell!
-
-The peak-to-peak voltage levels are still a bit too high (~ 3.6 V),
-but we are getting there. I can do one more round of "resistor
-tuning":
-
-![With Conversion 1](pics/with1.jpg) 
-
-![With Conversion 2](pics/with2.jpg) 
-
-This is obviously resistor / voltage-divider hell, but it's only an
-experimental breadboard, and I am going to design a proper PCB at some
-point when the project is ripe, and the planned features (see below)
-have been implemented. It's going to be a real product, eventually.
-
-I feel much more comfortable with the voltage dividers in place
-now. This should protect the Pico sufficently.
+- Harry Fairhead for his [execellent book](https://www.amazon.com/gp/product/1871962056)
+- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill, ATmegas and Arduinos,
+and for helping to get started and troubleshooting! 
+- The authors of the libraries I am using:
+  - Carl J Kugler III carlk3: [https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico](https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico)
+  - Raspberry Pi Foundation for the `ssd1306_i2c.c` demo.
 
 
-## Firmware
+## Dedication
 
-Checkout
-[https://github.com/raspberrypi/pico-setup-windows](https://github.com/raspberrypi/pico-setup-windows/tree/master);
-*Visual Studio Code (VSCode)* for Rasperry Pi Pico. This installation
-includes a set of Pico examples. Copy the files from the [`src`
-directory](./src) into a directory `sram` to your
-`pico-examples`. Also add the `add_subdirectory(sram)` to the global
-`CMakeLists.txt` in the `pico-examples` directory so that a `Build
-All` from VSCode will automatically generate it together with the
-other examples.
+Dedicated to my late father, Rudolf Wessel (26.12.1929 - 15.10.2023).
 
-After a build, you can simple copy the generated `sram.uf2` (see the
-`build/sram` sub-directory) to the Pico using the power-on reset USB
-method.
-
-## YouTube Video
-
-[Emulating (S)RAM with the Raspberry Pi
-Pico!](https://youtu.be/j5Tbw8vmk-s)
-
-## Future Plans / Next Steps 
-
-- add a display and enable save & load of SRAM images to EEPROM / SDCard, turning this into a powerfull SRAM-image based mass storage solution (no more cassette interface needed for saving and loading Microtronic programs)
-- add capability to select different SRAM banks using Microtronic's digital output ports, turning this into a banked memory expansion for the Microtronic offering up to 15x more RAM!
-- having a SHARED RAM between the Microtronic and the Pico enables interesting new features! See, the Pico could actually act as a co-processor - if it knew the current instruction the Microtronic is at, i.e., the value of the Program Counter (PC), it could do "something" autonomously with the current instruction. Obviously, it knows the RAM content. However, getting to know the PC is much complicated by the fact that there is no clear hardware signal, i.e., no CS as explained, and the address lines are also used for multiplexing the LED display as well as for keyboard matrix scanning. These result in involuntary SRAM accesses. Writes to the SRAM are easy to spot, sure (after all, we have the WE signal) - but that doesn't help for normal program execution. However,
-- it might be possible for the Pico to infer the current PC by monitoring the SRAM accesses and identify certain characteristic access patterns that give away what's happening - i.e., I would assume that accesses to three consecutive SRAM addresses would result from retrieving (loading) the current instruction at the PC... If this is indeed a characteristic access pattern that can be identified, it should be possible to infer the PC. And idea to investigate for sure.
-- if the Pico were able to determine the PC and hence the current instruction, some of the non-meaningful op-codes could be interpreted by the Pico to implement extra-semantics in terms of new side-effects. For examples, instructions of the pattern MOV <x> -> <x> (op-codes of the form 0xx), where x is one of the 16 4bit registers, copies register x to itself - a vacuous operation, and no real Microtronic program uses these op-codes. I have utilized these "vacuous", unused op-codes previously to implement extra-semantics in my Microtronic emulators: https://hackaday.io/project/176466-microtronic-the-next-generation and https://hackaday.io/project/180252-a-retro-authentic-microtronic-emulator I used them for speech and sound side-effects in the past.
-- given that the Pico is managing and serving the Microtronic's program memory, this  enables another interesting avenue previously blocked - self-modifying programs, or more generally, the ability to materialize arbitrary RAM content based on computation! Note that the Microtronic, by itself, is a Harvard-architecture, so traditionally all writable memory is register only (it has a large register file - two sets of sixteen 4bit registers). However, with the Pico for SRAM emulation in the loop, and the ability to introspect the current instruction and implement extra semantics, this road is now wide open!
-- design a PCB
+R.I.P, Papa - I will always fondly remember the days following
+Christmas 1983 for which you and Mom got me the Microtronic, and we
+entered the dauntingly big "Lunar Lander" program together. In loving memory! 
