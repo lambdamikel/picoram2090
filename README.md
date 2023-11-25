@@ -388,13 +388,8 @@ one at a time is possible due to a shortage of GPIO pins on the Pico.
 Use the switch labeled `TTS or SOUND` to select either. A push to the
 `RESET` button is required for the new mode to become effective.
 
-The current audio mode is also indicated in the OLED display (using
-`TTS` or `SND` indicators):
-
-![Display Sound](pics/disp1.jpg)
-
-![Display TTS](pics/disp2.jpg)
-
+The current audio mode is also indicated in the OLED display (`TTS`-`,
+`TTSE` or `SND` indicators in the first display line).
 
 ### Reset Button
 
