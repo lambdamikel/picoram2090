@@ -1,7 +1,7 @@
 # PicoRAM 2090
 
 A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card Interface,
-and Multi-Expansion for the [Busch 2090 Microtronic Computer System from 1981](https://github.com/lambdamikel/Busch-2090)
+and Multi-Expansion for the [Busch 2090 Microtronic Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ![PicoRAM 1](pics/picoram1.jpg)
 
@@ -12,35 +12,40 @@ and Multi-Expansion for the [Busch 2090 Microtronic Computer System from 1981](h
 ## History of the Project  
 
 PicoRAM 2090 started out as [a simple project to emulate the
-Microtronic 2114 SRAM}(README-old.md) in early September 2023, and
+Microtronic 2114 SRAM](README-old.md) in early September 2023, and
 evolved into a powerful and versatile multi-expansion for the
 Microtronic. It reached its current state end of November 2023.
 
-As a contribution to the RetroChallenge 2023/10](https://www.retrochallenge.org/p/entrants-list-202310.html) I developed the firmware to maturity, still using the breadboard; see my [Hackaday IO page](https://hackaday.io/project/192655-picoram-2090) and [YouTube videos](https://www.youtube.com/playlist?list=PLvdXKcHrGqhd8HcGb5lirYrgMoVZjP5XO)).
+As a contribution to the [RetroChallenge
+2023/10](https://www.retrochallenge.org/p/entrants-list-202310.html) I
+developed the firmware to maturity, still using the breadboard
+prototype; see my [Hackaday IO
+page](https://hackaday.io/project/192655-picoram-2090) and [YouTube
+videos](https://www.youtube.com/playlist?list=PLvdXKcHrGqhd8HcGb5lirYrgMoVZjP5XO).
 
 The project got covered by a number of sites: 
 
-- [Hackaday: Pi Pico Becomes SRAM For 1981 Educational Compute](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/) ![Hackaday Coverage](pics/hackaday2.jpg)
-- [Hackster: Michael Wessel Turns a Raspberry Pi Pico Into an Add-On for the Four-Bit Busch 2090 Microtronic SBC](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) [Hackster Coverage](pics/hackster.jpg)
+- [Hackaday: Pi Pico Becomes SRAM For 1981 Educational Computer](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/) ![Hackaday Coverage](pics/hackaday2.jpg)
+- [Hackster: Michael Wessel Turns a Raspberry Pi Pico Into an Add-On for the Four-Bit Busch 2090 Microtronic SBC](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) ![Hackster Coverage](pics/hackster.jpg)
 - [PiShop Blog: Pi Pico Becomes SRAM for 1981 Educational Computer](https://blog.pishop.co.za/pi-pico-becomes-sram-for-1981-educational-computer/)
 
 
 ## About
 
-PicoRAM 2090 is the ultimate expansion for the Microtronic.
+**PicoRAM 2090 is the ultimate expansion for the Microtronic.**
 
 It offers:
 
-- SD card: loading and saving of programs (full SRAM memory dumps) and easy file exchange with the PC (FAT32 filesystem).
-- comfortable GUI: 5 buttons and OLED display 
-- 16 memory banks: the currently active memory bank can selected manually via the GUI or by program; each bank hosts a full Microtronic RAM-
+- SD card interface: loading and saving of programs (full SRAM memory dumps) and easy file exchange with the PC (FAT32 filesystem).
+- comfortable UI: 5 buttons and OLED display. 
+- 16 memory banks: the currently active memory bank can selected manually via the UI or by program; each bank hosts a full Microtronic RAM.
 - mnemonics display: PicoRAM can show the current Microtronic instruction,
   address, and even mnemonics on its OLED display. Various display modes
   are offered - the mnemonics display greatly facilitates programming, 
   debugging, and learning the Microtronic machine language. 
-- harware extensions: speech synthesis (DECtalk-based), battery backed-up Real Time Clock (RTC), monophonic sound, ASCII text and even graphics output on the OLED display. Extended "vacuous" op-codes (see below) are used to access the extensions.
-- full integration: for example, the Microtronic's "GET TIME" op-code (F06) is intercepted so that the actual time from the RTC is loaded instead of the Microtronic's (internal, not battery backed-up) clock. 
-- easy to install: requires only simple modifications to the Microtronic PCB. 
+- harware extensions: speech synthesis (DECtalk-based), battery backed-up Real Time Clock (DS3231 RTC), monophonic sound, ASCII text and even graphics output on the OLED display. Extended "vacuous" op-codes (see below) are used to access the extensions.
+- full integration: for example, the Microtronic's `GET TIME` op-code (`F06`) is intercepted so that the actual time from the RTC is loaded instead of the Microtronic's (volatile, not battery backed-up) clock. 
+- easy to install: requires only simple modifications to the Microtronic PCB, and PicoRAM PCB uses off-the-shelf modules and through-hole components only. 
 
 ## Demo Videos
 
@@ -56,13 +61,13 @@ It offers:
 PicoRAM 2090 plugs into the 2114 SRAM socket of the Microtronic. The
 2114 has a capactiy of 1024 4bit words, i.e., it has a 10 bit address
 bus and a 4 bit data bus. The tristate (HighZ) capability of the 2114
-is not utilized by the the Microtronic, so CE is not
+is not utilized by the the Microtronic, so CS is not
 connected.
 
 ![SRAM 2114 Pinout](pics/2114.jpg)
 
 Interestingly, the "CPU" of the Microtronic, the TMS1600
-Microcontroller, does not really provide for external RAM or ROM
+Microcontroller, does not cater for external RAM or ROM
 memory, so the 2114 is connected via GPIO to the TMS1600:
 
 ![Microtronic Schematics](pics/schematics.jpg)
@@ -70,7 +75,7 @@ memory, so the 2114 is connected via GPIO to the TMS1600:
 However, the WE (Write Enable) line is of course required to
 distinguish read from write accesses to memory.
 
-Microtronic's RAM is organized as 255 12bit words. Hence, three 2114
+Microtronic's RAM is organized as 256 12bit words. Thus, three 2114
 memory locations are required to store one Microtronic word. This also
 leaves 256 memory locations unoccopied.
 
@@ -87,7 +92,7 @@ whilst driving the display or keyboard - it of course knows whether it
 addressed the SRAM, the display, or the keyboard). Hence, the Pico is doing
 the same.
 
-Ideally, the CE signal would have been used to uniquely signal that
+Ideally, the CS signal would have been used to uniquely signal that
 the currently presented address is a true SRAM address meant to
 address memory, but as seen from the schematics, this is not the case,
 and also not necessary in this design. 
@@ -105,7 +110,7 @@ index / dimension to this array: the bank number. Switching the
 currently active bank does not require any copying, but merely
 changing the value of the "active bank" variable.
 
-PicoRAM offers 16 banks that can be selected via the GUI (OK Button),
+PicoRAM offers 16 banks that can be selected via the UI (OK Button),
 or by programm (extended op-code `70x`), and a few temporary banks
 that are used for extended op-codes (see below).
 
@@ -116,7 +121,7 @@ Identifying the 12bit instruction words that is currently addressed
 
 Even though the Pico sees all activity on the 10bit "address bus" and
 4bit "data bus" (bus in double quotes here because these "buses" are
-really just TMS1600 GPIO lines, and the CE signal of the 2114 is not
+really just TMS1600 GPIO lines, and the CS signal of the 2114 is not
 utilized!) it is *not* straight-forward to distinguish true SRAM
 accesses for fetching the current instruction from "involuntarily"
 ones that happen as a side effect of driving the 7segment LED display
@@ -288,7 +293,7 @@ directly (immediate) in the code (address, op-code, and explanation):
 
 The first core of the Pico is implementing the SRAM emulation, including bank-switching, identifying the current instruction, etc.
 
-The second core is implementing the GUI, extended op-codes, access to
+The second core is implementing the UI, extended op-codes, access to
 the hardware extensions, etc.
 
 The Pico is overclocked to 250 Mhz (not a problem at all). 
@@ -297,32 +302,37 @@ The Pico is overclocked to 250 Mhz (not a problem at all).
 
 This is the current list of extended op-codes; note that future
 firmware versions might contain additional sets (different op-code
-sets might be selecteable from the GUI): 
+sets might be selecteable from the UI).
 
-```
-   0xx ENTER LITERAL DATA x
+Note that `<CHAR>`, `<NOTE>` and `<OCTAVE>` are single bytes, in
+little endian order and hence a sequence of two nibbles: `<LOW>,
+<HIGH>`.  Moreover, all graphics coordinates `X,Y,X1,X2,Y1,Y2` are
+bytes and require 2 nibbles each. In contrast, `TX, TY` require one
+nibble only (text screen colum / row coordinates):
 
-   3Fx ENTER DATA FROM REG x 
-
-   500 HEX DATA ENTRY MODE
-   501 DEC DATA ENTRY MODE
-   502 DISP CLEAR SCREEN 
-   503 DISP TOGGLE UPDATE  
-   504 DISP REFRESH
-   505 DISP CLEAR LINE <X> 
-   506 DISP SHOW CHAR <LOW><HIGH>
-   507 DISP CURSOR SET CURSOR LINE <X>
-   508 DISP SET CURSOR <X> <Y>
-   509 DISP PLOT <X> <Y> 
-   50A DISP LINE <X1> <Y1> <X2> <Y2>
-   50B DISP LINE FROM <X> <Y> 
-   50C DISP LINE TO   <X> <Y> 
-   50D SOUND PLAY NOTE <X><Y> (SOUND OFF FIRST) 
-   50E SPEAK DISP ECHO
-   50F SPEAK BYTE <LOW><HIGH>
-
-   70x SWITCH MEMORY BANK x
-``` 
+---------------------------------------------------------------------------------------------
+| Op-Code | # Operand / Argument Nibbles | Explanation                                      |
+--------------------------------------------------------------------------------------------|
+| `0xx`   | 0                            | Enter Literal Data Nibble `x`                    |
+| `3Fx`   | 0                            | Enter Data Nibble from Register `x`              |
+| `500`   | 0                            | Hexadecimal Data Entry Mode                      | 
+| `501`   | 0                            | Decimal Data Entry Mode                          |  
+| `502`   | 0                            | Clear OLED Display                               |
+| `503`   | 0                            | Auto or manual OLED display updates              | 
+| `504`   | 0                            | Refresh OLED Display                             | 
+| `505`   | 1                            | Display Clear Line <LOW>                         | 
+| `506`   | 2                            | Display Show ASCII Character <CHAR>              | 
+| `507`   | 1                            | Display Set Cursor at Line <TY>                  |  
+| `508`   | 2                            | Display Set Cursor at Pos <TX> <TY>              | 
+| `509`   | 4                            | Display Plot <LOW><HIGH> (=X) <LOW'><HIGH'> (=Y) |
+| `50A`   | 8                            | Display Line <X1>,<Y1> <X2>,<Y2>                 |
+| `50B`   | 4                            | Display Line From - <X>,<Y>                      |
+| `50C`   | 4                            | Display Line To <X>,<Y> -                        | 
+| `50D`   | 2                            | Play Note <OCTAVE> <NOTE> (Sound Model Only)     | 
+| `50E`   | 0                            | Enable TTS Display Echo                          | 
+| `50F`   | 1                            | Send <CHAR> to TTS (Speech Mode Only)            | 
+| `70x`   | 1                            | Select Memory Bank `x`                           | 
+---------------------------------------------------------------------------------------------
 
 ## Operating Instructions
 
