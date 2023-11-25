@@ -593,7 +593,7 @@ creation and file selection operations**:
   used to abort the load process.
 
 - In **file save mode** (`DOWN` button), the `UP` and `DOWN` buttons
-  are used to *determine the next ASCII character of the filename
+  are used to determine the next ASCII character of the filename
   under constructions. *A short press of `NEXT/PREV` advances to the
   next character, and a longer press jumps back to the previous
   character.* `OK` and `CANCEL` have their normal meaning. The buttons
