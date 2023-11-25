@@ -4,9 +4,9 @@ A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card
 Interface, and Multi-Expansion for the [Busch 2090 Microtronic
 Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
-![PicoRAM 1](pics/picoram1.jpg)
-
 ![PicoRAM 2](pics/picoram2.jpg)
+
+![PicoRAM 1](pics/picoram1.jpg)
 
 ## History of the Project  
 
@@ -48,7 +48,7 @@ It offers:
 
 - Comfortable UI: 5 buttons and OLED display.
 
-- 16 memory banks: the currently active memory bank can selected
+- 16 user memory banks: the currently active memory bank can selected
   manually via the UI or by program; each bank hosts a full
   Microtronic RAM.
 
@@ -84,48 +84,59 @@ It offers:
 ### 2114 SRAM Emulation 
 
 PicoRAM 2090 plugs into the 2114 SRAM socket of the Microtronic. The
-2114 has a capactiy of 1024 4bit words, i.e., it has a 10 bit address
-bus and a 4 bit data bus. The tristate (HighZ) capability of the 2114
-is not utilized by the the Microtronic, so CS is not
-connected.
+2114 has a capactiy of 1024 4bit words, i.e., it has a 10bit address
+bus and a 4bit data bus. The tristate (HighZ) capability of the 2114
+is not utilized by the the Microtronic, so CS is not connected. 
 
 ![SRAM 2114 Pinout](pics/2114.jpg)
 
-Interestingly, the "CPU" of the Microtronic, the TMS1600
-Microcontroller, does not cater for external RAM or ROM
-memory, so the 2114 is connected via GPIO to the TMS1600:
+Interestingly, the "CPU" of the Microtronic, the mask-programmed
+TMS1600 Microcontroller, does not cater for external RAM or ROM, so
+the 2114 is connected via GPIO to the TMS1600. This can be seen
+clearly in the Microtronic schematics: 
 
 ![Microtronic Schematics](pics/schematics.jpg)
 
-However, the WE (Write Enable) line is of course required to
-distinguish read from write accesses to memory.
+The WE (Write Enable) line is of utilized to distinguish read from
+write accesses to the 2114. 
 
-Microtronic's RAM is organized as 256 12bit words. Thus, three 2114
-memory locations are required to store one Microtronic word. This also
-leaves 256 memory locations unoccopied.
+Microtronic's RAM is organized in 256 12bit words. Thus, three 2114
+memory locations are required to store one Microtronic 12bit
+word. Interestingly, this also leaves 256 memory locations in the 2114
+unused.  To the best of our knowledge, these SRAM locations are just
+void.
 
 As can be seen in the schematics, the "address" bus to the 2114 is
-just a general-purpose output port, and shared with the 6-digit
-7-segment display and keyboard. For the purpose of serving the RAM,
-the Pico just runs a tight loop and presents the content of its
-"memory array" on the 4 data lines as quickly as possible. It is not
-necessary to distinguish the addresses that correspond to "real SRAM"
-accesses from accesses that are caused by driving the display or from
-scanning the keyboard (the Microtronic 2114 SRAM is actually
-outputting data for these as well, but the firmware just ignored them
-whilst driving the display or keyboard - it of course knows whether it
-addressed the SRAM, the display, or the keyboard). Hence, the Pico is
-doing the same.
+utilizing general-purpose TMS1600 output ports (6 bits from the `R`
+port and `4` bits from the `O` port), which are also shared with the
+6-digit 7-segment LED display and keyboard! Since CS is not utilized
+by this design, it is challenging to distinguish Microtronic's SRAM
+accesses on these ports from keyboard scanning and display driving
+activitiy (see below). 
 
-Ideally, the CS signal would have been used to uniquely signal that
-the currently presented address is a true SRAM address meant to
-address memory, but as seen from the schematics, this is not the case,
-and also not necessary in this design.
+For the purpose of serving the RAM, the Pico just runs a tight loop
+and presents the content of its "memory array" on the 4 data lines as
+quickly as possible.
 
-As for write requests, we have a clear indiciation when to update the
-C array holding the memory contents in terms of the WE signal going
-low.  When this happens, PicoRAM stores the 4bit value presented on
-the data lines into its memory C array.
+Luckily, for the mere purpose of SRAM emulation, is not necessary to
+distinguish the addresses that correspond to "real SRAM" accesses from
+accesses caused by driving the display and keyboard scanning - the
+2114 SRAM is actually presenting data for these as well, but the
+Microtronic firmware just ignores them whilst driving the display or
+keyboard (it of course knows whether it addressed the SRAM, the
+display, or the keyboard). This situation isn't different with the
+Pico RAM emulating the 2114. It, too, reacts to all presented
+addresses and presents data for all of them on the data port; some of
+them will be meaningless and ignores by the Microtronic firmware.
+Ideally, the CS signal would have been used to unambiguously identify
+the "real" SRAM accesses, but as explained, this is not an option in
+the Microtronic design.
+
+As for write requests, the situation is much simpler - we have a clear
+signal in form of the WE signal gowing low when to update the C array
+holding the memory contents. When this happens, PicoRAM simply stores
+the current 4bit value on the data lines (`L1`, `L2`, `L4`, `L8`) 
+into its memory C array.
 
 ### Banked Memory
 
@@ -133,28 +144,35 @@ Given that the Microtronic memory is just a big C array, it is
 straight-forward to support banked memory simply by adding one more
 index / dimension to this array: the bank number. Switching the
 currently active bank does not require any copying, but merely
-changing the value of the "active bank" variable.
+changing the value of the "active bank" index variable:
 
-PicoRAM offers 16 banks that can be selected via the UI (`OK` button),
-or by programm (extended op-code `70x`), and a few temporary banks
-that are used for extended op-codes (see below).
+```
+  val = ram[cur_bank][adr];
+  gpio_put_masked(data_mask, ~ (val << DATA_GPIO_START));
+```
 
-### Identifying the Current Instruction
+PicoRAM offers 16 user RAM banks that can be selected via the UI (`OK`
+button), or by programm (extended op-code `70x`). Moreover, a few
+temporary banks are used for implementing and managing the extended
+op-codes (see below).
+
+### The Challenge of Identifying the Current Instruction
 
 Identifying the 12bit instruction words that is currently addressed
-(executed, displayed, ...) by the Microtronic is not straight-forward.
+(executed, displayed, ...) by the Microtronic is not straight-forward
+due to the missing 2114 CS signal. 
 
 Even though the Pico sees all activity on the 10bit "address bus" and
 4bit "data bus" (bus in double quotes here because these "buses" are
-really just TMS1600 GPIO lines, and the CS signal of the 2114 is not
-utilized!) it is *not* straight-forward to distinguish true SRAM
-accesses for fetching the current instruction from "involuntarily"
-ones that happen as a side effect of driving the 7segment LED display
-or keyboard scanning activities of the Microtronic firmware (OS).
+really just TMS1600 GPIO lines, as explained) it is *not*
+straight-forward to distinguish true SRAM accesses for fetching the
+current 12bit instruction word from "involuntarily" accesses that
+happen as a side effect of driving the LED display or keyboard
+scanning performed by the Microtronic firmware ("OS"). 
 
-However, by monitoring the last four addresses on the address bus,
-a necessary condition for identifying the current Microtronic 12bit
-instruction word is the following: 
+However, by monitoring the last four addresses on the address bus, *a
+necessary condition* for identifying the current Microtronic 12bit
+instruction word is the following:
 
 ```
 	  if (adr & (1 << 8)) {
@@ -167,117 +185,144 @@ where `adr` is the current address on the address bus, and ``adr4`` to
 address bus. 
 
 If the Pico detects such a sequence of addresses on the address bus,
-then this the Microtronic has fetched a 12bit instruction starting at
-Microtronic memory address `adr4 & 0xFF`. Note that three 4bit
-2114 SRAM words that make up the 12bit Microtronic word are not at
-consecutive locations in the 2114 SRAM, but instead utilize set bits 8 and 9
-to group the three 4bit words into on 12bit word. 
+then the Microtronic has fetched a 12bit instruction starting at
+Microtronic memory address `adr4 & 0xFF`. Note that three 4bit 2114
+SRAM words that make up a 12bit Microtronic op-code / instruction word
+are these are not at consecutive memory locations in the
+2114. Instead, set bits 8 and 9 are used to group the three 4bit words
+into one 12bit word.
 
-Unfortunately, his mechanism does not work for the address `00`.
-Moreover, there are still "false positives" that are caused by display
-multiplexing! In principle, these are indistinguishable from real SRAM
-accesses from our external perspective - only the Microtronic firmware
-knows whether it is addressing the SRAM or multiplexing the display.
+Unfortunately, his mechanism does not work for Microtronic word at
+Microtronic address `00`.  Moreover, there are still **false
+positives** that are caused by display multiplexing! In principle,
+these false positives are indistinguishable from real SRAM accesses
+from PicoRAM's external perspective - only the Microtronic firmware
+knows whether it is addressing the SRAM or the keyboard or display. 
 
-To eliminate these false positives, and thus turn this condition into
-a *sufficient (and necessary) condition* for the current instruction,
-one more input signal from the TMS1600 is required: as can be seen in
-the schematics, the TMS1600 GPIO port `R12` is used to address / drive
-the individual six digits of the 7segment display. IF at least ONE of
-the six digits is being enbled by R12, then this signal can be used to
-identify display accesses and hence remove these false positives.
-PicoRAM hence requires the `R12 (DISP)` wire to robustly identify the
-current instruction (executed or on the monitor display). Without the
-extra `DISP` wire for robust operation; without it, it will still
-serve as SRAM emulator and SD card storage device, but extended
-op-codes and hardware extensions (sound, speech, text and graphics
-display, RTC) cannot be used.
+To *eliminate these false positives*, and also turn this necessary
+condition into a **sufficient condition**, it has to be strengthened
+by adding one more input signal from the TMS1600 to the mix - the
+`R12` line. As can be seen in the schematics, the TMS1600 GPIO port
+`R12` is used to trigger / drive the individual digits of the
+display. We can hence eliminate all addresses that also have `R12` 
+active, provided that the display is on, i.e., at least one of the
+six 7segment digits is shown on the Microtronic's LED display.
 
-Moreover, the display CANNOT be turned off completely while the
-Microtronic program is running - programs that use the `F02 (DISPOUT)`
-op-code, and hence run without display output, cannot use extended
-op-codes. Extended op-codes (and hence the hardware extensions) can
-only be used when the Microtronic 7segment LED display is displaying
-something. Moreover, there can be no extended op-code at address `00`.
-These are not severe restrictions. 
+**PicoRAM hence requires the `R12 (DISP)` signal to robustly identify
+the current instruction that is executed, or on the LED display, by
+the Microtronic.** Without the extra `DISP` wire for robust operation
+it will still perfectly function as SRAM emulator and SD card storage
+device, but extended op-codes and hardware extensions (sound, speech,
+text and graphics display, RTC) will not function properly, and the
+op-code OLED display will also not work properly. Hence, I strongly
+recommend to add the extra `DISP` wire to the Microtronic PCB; it's a
+simple mod.
+
+*It should be clear by now that extended op-codes will not work
+reliably for programs that turn off the LED display using the `FO2
+(DISP OUT)` op-code. Moreover, there can be no extended op-code at
+address `00`.  These are not severe restrictions.* 
 
 ### Extended Op-Codes
 
-Vacuous, extended op-codes are used to access the hardware extensions.
-A vacuous op-code is a Microtronic op-code that does something, but
-basically boils down to a convoluted no-op. These op-codes are being
-executed by the Microtronic and leave the register contents
-unchanged; hence, no real Microtronic program is using them. PicoRAM
-monitors the current instruction, detects these special op-codes,
-and uses them to implement certain side effects.
+**Vacuous, extended op-codes** are used to access the hardware
+extensions.  A *vacuous op-code* is a Microtronic op-code that does
+something, but basically boils down to a convoluted no-op. These
+op-codes are being executed by the Microtronic and leave the register
+contents unchanged; hence, no real Microtronic program is using them
+(they would rather use `F01 (NOP)` instead). PicoRAM monitors the
+current instruction, detects these special vacuous op-codes, and put
+them to work by implementing extra side effects, i.e., to drive the
+PicoRAM hardware extensions.
 
 A simple example is the op-code `502`, `ADDI 0 to register 2`, which
 means "add zero to register 2".  This is semantically a no-op, a
-"vacuous" op-code. The PicoRAM detects this op-code and implements a
-special side effect semantics for it: *clear the OLED display.* 
+"vacuous" op-code. No existing Microtronic program uses it. It is
+hence available to be used for PicoRAM! PicoRAM detects this 
+op-code and implements a special side-effect semantics for it: **clear
+the OLED display.** 
 
-Many extended op-codes require operands though. For example,
-`50D` = `play note` initiates a sound output command. The Pico
-then enters the "sound extension enabled" mode, and is now
-awaiting additional vacuous op-codes that specify the note
-number to be played, as well as the octave (in reverse order).
+Many *extended op-codes require operands / arguments though.* For
+example, the PicoRAM's extended op-code `50D (Play Note)` initiates a
+sound output command. This command requires arguments - the octave,
+and note number to be played. The Pico then enters the "sound
+extension enabled" mode, and is now awaiting additional vacuous
+op-codes that specify these arguments. 
 
-To specify these operands / arguments, the vacuous op-codes `0xx`,
-mnemonic `MOV x->x`, are used: "copy content of register `x` (0 to F)
-onto inself". Depending on the number of nibbles `x` required as
-operands / arguments to the currently active instruction, one to 8
-such nibbles `x` can be specified immediately, i.e., literally, in the
-code. For example, the sequence `50D 011 022` plays note 2 from octave
-1.
+To specify these operands / arguments literrally in the machine code
+("immediate" style), the vacuous op-codes `0xx`, mnemonic `MOV x->x`,
+are used: "copy content of register `x` (0 to F) onto
+inself". Depending on the number of nibbles `x` required as operands /
+arguments, 1 to 8 such nibbles `x` are supplied. For example, the
+op-code sequence `50D 011 022` plays note 2 from octave 1. 
 
-Specifying arguments directly via `0xx` op-codes is fast, but lacks
-flexbility. Since the Microtronic is a Harvard architecture, it is not
-possible to modify the program memory with a program. Registers
-have to be used.
+Specifying arguments directly (literally, immediately in code) via
+`0xx` op-codes is fast, but lacks flexbility - arguments can then not
+be computed at runtime! Since the Microtronic is a Harvard
+architecture, it is not possible to modify the program memory with a
+program. Registers have to be used instead if runtime computed
+arguments are required. 
 
-In order to specify the value of a register as an operand / argument
-to an extended op-code, i.e., say we want to play note `x` in register
-0, we need a special trick. The problem is that PicoRAM does not have
-any access to the register memory! The registers are stored directly
-on the TMS1600 chip, and *not* in the 2114 SRAM. *So how can PicoRAM
-get to know the current value of a register?* Answer: by temporarily
-"banking-in" a register interrogation program that display a certain
-behavior characteristic for register x having content y. This behavior
-is observed by the Pico, and used to infer its current content
-indirectly. 
+In order to use the value of a *register as an operand / argument to
+an extended op-code**, e.g., say to *play note number `x` in register
+0*, we need a special trick. The problem is that PicoRAM does not have
+access to the register memory, as Microtronic registers are stored on
+the TMS1600 chip, not in the 2114 SRAM. *So how can PicoRAM get to
+know the current value of a register?* Answer: *by temporarily
+"banking-in" a register interrogation program* that shows certain
+address access-pattern characteristic for register `x` having value
+`y`. The Microtronic's execution of this interrogation program is
+observed by the the Pico, from which it can then infer the current
+value `y` of register `x` indirectly (a certain address is reached by
+the program that gives it away).
 
-The full technical explanation is complicated. But, in a nutshell, the
-following is happening. Suppose we want to supply the (maybe computed)
-note number to the `play tone`, `50D` op-code from register 0. We use
-the vacuous op-code `3Fx`, `ANDI F x` ("do a logical AND of the
-immediate value F with the content of register x") to mean "supply the
-content of register x as argument". 
+Here is an example. Suppose we want to supply the (maybe computed)
+note number to the `50D (Play Note)` extended op-code from register
+0. Instead of using `0xx` to supply the nibble immediate and literally
+as a constant in the code, we are now using the vacuous op-code `3Fx`,
+`ANDI F x` ("do a logical AND of the immediate value F with the
+content of register x") to mean *supply the content of register x as
+argument to the current extended instruction*. 
 
-When the Pico detects `3Fx`, it immediately switches to a temporary
-memory bank, and then executes a JUMP to address 00 (`C00`). From
-there it then executes a "register interrogation program" - this
-program performs a binary search to determine the current register
-value.  Again, not that the Microtronic simply write the value into
-program memory.  It can, however, do a number of compares and
-conditional branches to determine the value via binary search. The
-Pico is able to observe the addresses that are reached whilst the
-Microtronic is executing this binary search "register interrogation
-program", and certain target addresses are reached for certain
-register values. The Pico is hence able to infer the register value of
-the interrogated register. After the register value has been inferred,
-a jump-back to the instruction after the original `3FX` is
-materialized in the temporary memory bank, and the original memory
-bank restablished, so that normal program execution continues.
+When the Pico detects `3Fx`, it now immediately switches to a
+*temporary memory bank containing the interrogation program*, i.e.,
+materializes this program for the Microtronic, and then presents a
+JUMP to address `00` (`C00`) to the Microtronic as the next
+instruction word. Hence, the Microtronic has now left user program
+execution, and starts executing the interrogation program starting at
+address 00 in the temporary memory bank. This interrogation program
+performs a binary search to determine the current register value.  The
+Microtronic cannot simply write the current value of the register into
+program memory for the Pico to see, due to its Harvard architecture.
+It can, however, do a number of compares and conditional branches to
+determine the register value via binary search! The Pico observes the
+addresses that are reached during the execution of the banked-in
+interrogation program, and **characteristic, unique target addresses
+are reached for specific register values**. One such a target address
+has been reached by the Microtronic executing the interrogation
+program, the Pico knows the value of the interrogated register. It
+uses this value to supply the next argument to the current extended
+op-code waiting for it. When all arguments have been "collected", the
+extended op-code is executed by PicoRAM. Finally, now that the
+register value has been inferred, a JUMP instruction after the
+original `3Fx` is temporarily materialized for the Microtronic by the
+Pico, and the original user memory bank restored. The Microtronic
+continues execution of the user program with the next instruction
+after `3Fx` as if nothing had happened.
 
-From the user program's point of view, this happens trasparently.
-However, it is quite slow - to determine the current value of a
-register takes almost half a second or so, as a few dozend operations
-have to be executed (and the Microtronic is a very slow machine).
+From the user program's point of view, this register interrogation
+process happened trasparently. However, it is quite slow - determining
+the current value of a register takes almost quarter of a second or
+so, as a few dozend operations have to be executed from the
+interrogation program (the Microtronic is a very slow machine indeed,
+clocked the TMS1600 is clocked at 500 kHz, and it should have become
+clear now that the Microtronic OS / firmware is a very complex
+program).
 
 Note that immediate / code-supplied and register-supplied arguments
-can be combined. For example, here is a program that uses
-register 0 to supply the note number, but specifies the octave
-directly (immediate) in the code (address, op-code, and explanation):
+can be mixed. For example, here is a program that uses register 0 to
+supply the note number to be player, but specifies the octave number
+in code:
 
 ```
 00 F10 # display register 0 on display 
@@ -288,30 +333,34 @@ directly (immediate) in the code (address, op-code, and explanation):
 05 C01 # jump to address 01 (50D, ...) 
 ``` 
 
-
 ### Dual Core Operations
 
+PicoRAM utilizes both cores of the RP2040 (Raspberry Pi Pico). 
+
 The *first core* of the Pico is implementing the SRAM emulation,
-including bank-switching, identifying the current instruction, etc.
+including bank-switching, identifying the current address and
+instruction, etc.
 
-The *second core* is implementing the UI, extended op-codes, access to
-the hardware extensions, etc.
+The *second core* is driving the OLED display, and implements the UI,
+extended op-codes, and access to the hardware extensions.
 
-The Pico is *overclocked to 250 Mhz* (this is still well within range
-and not problematic at all).
+The Pico is *overclocked to 250 Mhz* - this is still well within range
+and not problematic at all (some folks have successfully overclocked
+the Pico to 1 GHz!)
 
 ## List of Extended Op-Codes
 
 This is the current list of extended op-codes; note that future
-firmware versions might contain additional sets (different op-code
+firmware versions might contain additional sets (and different 
 sets might be selecteable from the UI).
 
-Note that `<CHAR>`, `<NOTE>` and `<OCTAVE>` are single bytes, in
-little endian order and hence a sequence of two nibbles: `<LOW>,
-<HIGH>`.  Moreover, all graphics coordinates `X,Y,X1,X2,Y1,Y2` are
-bytes and require 2 nibbles each. In contrast, `TX, TY` require one
-nibble only (text screen colum / row coordinates):
-
+In the following, `<CHAR>`, `<NOTE>` and `<OCTAVE>` represent single
+bytes, in little endian order (a sequence of two nibbles: `<LOW>,
+<HIGH>`).  Moreover, all graphics coordinates `X,Y,X1,X2,Y1,Y2` are
+bytes and require 2 nibbles each. In contrast, `TX, TY` are text
+display cursor location (text screen colum / row coordinates), and
+only reguire a single nibble (`<LOW>`), or two nibbles (`<LOW>,
+`<LOW'>`):
 
 ---------------------------------------------------------------------------------------------
 | Op-Code | # Operand / Argument Nibbles | Explanation                                      |
@@ -336,6 +385,63 @@ nibble only (text screen colum / row coordinates):
 | `50F`   | 1                            | Send <CHAR> to TTS (Speech Mode Only)            | 
 | `70x`   | 1                            | Select Memory Bank `x`                           | 
 ---------------------------------------------------------------------------------------------
+
+Please have a look at the provided [example programs](software/).
+
+Here is an [example program demonstrating graphics, text, and speech output](software/MICRONET.MIC) - ensure TTS is enabled: 
+
+![Micronet](pics/micronet.jpg)
+
+```
+F08
+F20
+50A
+000
+3F0
+088
+000
+000
+3F1
+0FF
+011
+520
+980
+E0F
+C02
+100
+521
+981
+E14
+C02
+50E
+506
+0DD
+044
+099
+044
+033
+044
+022
+055
+0FF
+044
+044
+055
+022
+055
+0FF
+044
+0EE
+044
+099
+044
+033
+044
+0AA
+000
+F00
+```
+
 
 
 ## Operating Instructions
