@@ -314,10 +314,9 @@ From the user program's point of view, this register interrogation
 process happened trasparently. However, it is quite slow - determining
 the current value of a register takes almost quarter of a second or
 so, as a few dozend operations have to be executed from the
-interrogation program (the Microtronic is a very slow machine indeed,
-clocked the TMS1600 is clocked at 500 kHz, and it should have become
-clear now that the Microtronic OS / firmware is a very complex
-program).
+interrogation program (the Microtronic is a very slow machine indeed;
+the TMS1600 is clocked at 500 kHz, and the Microtronic OS / firmware
+is a complex program). 
 
 Note that immediate / code-supplied and register-supplied arguments
 can be mixed. For example, here is a program that uses register 0 to
