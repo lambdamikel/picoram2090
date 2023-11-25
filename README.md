@@ -24,6 +24,8 @@ prototype; see my [Hackaday IO
 page](https://hackaday.io/project/192655-picoram-2090) and [YouTube
 videos](https://www.youtube.com/playlist?list=PLvdXKcHrGqhd8HcGb5lirYrgMoVZjP5XO).
 
+![Final Breadboard](pics/final-breadboard.jpg) 
+
 The project got covered by a number of sites: 
 
 - [Hackaday: Pi Pico Becomes SRAM For 1981 Educational
