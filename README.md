@@ -578,21 +578,21 @@ These programs may change without notice.
 
 The standard operation sequence should look as follows:
 
-- load a memory dump from SD card using the `UP` button; select a
+1. load a memory dump from SD card using the `UP` button; select a
   `.MIC` file using `UP`, `DOWN`, and `OK` / `CANCEL`.
 
-- set the Microtronic to address 00: `HALT-NEXT-00`.
+2. set the Microtronic to address 00: `HALT-NEXT-00`.
 
-- disable the OLED display using the `CANCEL` button.
+3. disable the OLED display using the `CANCEL` button.
 
-- ensure that extended op-codes are enabled: hit the `OK` button until
+4. ensure that extended op-codes are enabled: hit the `OK` button until
   `OP-EXT ON (*)` is shown.
 
-- start the Microtronic program: `HALT-NEXT-00-RUN`.
+5. start the Microtronic program: `HALT-NEXT-00-RUN`.
 
-- important: **when the Microtronic program has finished, DISABLE
-  extended op-codes, else you will see weird behavior in the
-  Microtronic monitor if the extended op-codes are still enabled!**
+6. important: **when the Microtronic program has finished, DISABLE
+   extended op-codes, else you will see weird behavior in the
+   Microtronic monitor if the extended op-codes are still enabled!**
 
 The last step is imporant because some of the extended op-codes may
 require banking-in of temporary, auxiliary program fragments. If the
@@ -683,8 +683,9 @@ connector:
 ----------------------------------------------------------------------------------------------------------------------
 
 For SW, SW2, SW6, note that the common pin of these switches needs to
-be in the middle! The Blue and Gray switches from Amazon are different
-- get the Gray ones!
+be in the middle! The blue and gray switches from Amazon have a
+different pinout - get the gray ones, the blue ones don't work
+for my Gerbers / schematics!
 
 Moreover, I am using [Mounting
 Feet](https://www.amazon.com/gp/product/B07DHHS1Q8) and crimpable
