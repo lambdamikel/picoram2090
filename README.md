@@ -43,16 +43,34 @@ The project got covered by a number of sites:
 
 It offers:
 
-- SD card interface: loading and saving of programs (full SRAM memory dumps) and easy file exchange with the PC (FAT32 filesystem).
-- Comfortable UI: 5 buttons and OLED display. 
-- 16 memory banks: the currently active memory bank can selected manually via the UI or by program; each bank hosts a full Microtronic RAM.
-- Mnemonics display: PicoRAM can show the current Microtronic instruction,
-  address, and even mnemonics on its OLED display. Various display modes
-  are offered - the mnemonics display greatly facilitates programming, 
-  debugging, and learning the Microtronic machine language. 
-- Harware extensions: speech synthesis (DECtalk-based), battery backed-up Real Time Clock (DS3231 RTC), monophonic sound, ASCII text and even graphics output on the OLED display. Extended "vacuous" op-codes (see below) are used to access the extensions.
-- Full integration: for example, the Microtronic's `GET TIME` op-code (`F06`) is intercepted so that the actual time from the RTC is loaded instead of the Microtronic's (volatile, not battery backed-up) clock. 
-- Easy build & installation: requires only simple modifications to the Microtronic PCB, and PicoRAM PCB uses off-the-shelf modules and through-hole components only. 
+- SD card interface: loading and saving of programs (full SRAM memory
+  dumps) and easy file exchange with the PC (FAT32 filesystem).
+
+- Comfortable UI: 5 buttons and OLED display.
+
+- 16 memory banks: the currently active memory bank can selected
+  manually via the UI or by program; each bank hosts a full
+  Microtronic RAM.
+
+- Mnemonics display: PicoRAM can show the current Microtronic
+  instruction, address, and even mnemonics on its OLED
+  display. Various display modes are offered - the mnemonics display
+  greatly facilitates programming, debugging, and learning the
+  Microtronic machine language.
+
+- Harware extensions: speech synthesis (DECtalk-based), battery
+  backed-up Real Time Clock (DS3231 RTC), monophonic sound, ASCII text
+  and even graphics output on the OLED display. Extended "vacuous"
+  op-codes (see below) are used to access the extensions.
+
+- Full integration: for example, the Microtronic's `GET TIME` op-code
+  (`F06`) is intercepted so that the actual time from the RTC is
+  loaded instead of the Microtronic's (volatile, not battery
+  backed-up) clock.
+
+- Easy build & installation: requires only simple modifications to the
+  Microtronic PCB, and PicoRAM PCB uses off-the-shelf modules and
+  through-hole components only.
 
 ## Demo Videos
 
@@ -96,18 +114,18 @@ accesses from accesses that are caused by driving the display or from
 scanning the keyboard (the Microtronic 2114 SRAM is actually
 outputting data for these as well, but the firmware just ignored them
 whilst driving the display or keyboard - it of course knows whether it
-addressed the SRAM, the display, or the keyboard). Hence, the Pico is doing
-the same.
+addressed the SRAM, the display, or the keyboard). Hence, the Pico is
+doing the same.
 
 Ideally, the CS signal would have been used to uniquely signal that
 the currently presented address is a true SRAM address meant to
 address memory, but as seen from the schematics, this is not the case,
-and also not necessary in this design. 
+and also not necessary in this design.
 
 As for write requests, we have a clear indiciation when to update the
 C array holding the memory contents in terms of the WE signal going
 low.  When this happens, PicoRAM stores the 4bit value presented on
-the data lines into its memory C array.  
+the data lines into its memory C array.
 
 ### Banked Memory
 
@@ -132,7 +150,7 @@ really just TMS1600 GPIO lines, and the CS signal of the 2114 is not
 utilized!) it is *not* straight-forward to distinguish true SRAM
 accesses for fetching the current instruction from "involuntarily"
 ones that happen as a side effect of driving the 7segment LED display
-or keyboard scanning activities of the Microtronic firmware (OS). 
+or keyboard scanning activities of the Microtronic firmware (OS).
 
 However, by monitoring the last four addresses on the address bus,
 a necessary condition for identifying the current Microtronic 12bit
@@ -156,7 +174,7 @@ and
 
 is an "address window" of the last four addresses.
 
-If the Pico detects such a sequence of addresses on the address bus, 
+If the Pico detects such a sequence of addresses on the address bus,
 then this is a necessary condition for the Microtronic to access the
 12bit instruction at address `adr4`.
 
@@ -282,12 +300,14 @@ directly (immediate) in the code (address, op-code, and explanation):
 
 ### Dual Core Operations
 
-The first core of the Pico is implementing the SRAM emulation, including bank-switching, identifying the current instruction, etc.
+The *first core* of the Pico is implementing the SRAM emulation,
+including bank-switching, identifying the current instruction, etc.
 
-The second core is implementing the UI, extended op-codes, access to
+The *second core* is implementing the UI, extended op-codes, access to
 the hardware extensions, etc.
 
-The Pico is overclocked to 250 Mhz (not a problem at all). 
+The Pico is *overclocked to 250 Mhz* (this is still well within range
+and not problematic at all).
 
 ## List of Extended Op-Codes
 
@@ -355,8 +375,8 @@ to be on the safe side anyway.
 Before powering on the Microtronic, make sure PicoRAM 2090 is running!
 Turn on PicoRAM by pushing the POWER button.
 
-The `PWR`LED on the MikroE speech daugher board should come on immediately,
-as well as the OLED display. 
+The `PWR`LED on the MikroE speech daughter board should come on
+immediately, as well as the OLED display.
 
 ### Audio 
 
@@ -364,7 +384,9 @@ Use a standard mini stereo jack connector cable to connect the
 MikroE TextToSpeech click board to the `LINE IN` connector.
 Determine the VOLUME using the potentiometer.
 
-PicoRAM is equipped with a [PAM8403 class D audio amplifier](https://www.ebay.com/itm/191855753895) powering a loudspeaker of your choice.
+PicoRAM is equipped with a [PAM8403 class D audio
+amplifier](https://www.ebay.com/itm/191855753895) powering a
+loudspeaker of your choice.
 
 ![Speaker](pics/speaker.jpg)
 
@@ -372,10 +394,11 @@ PicoRAM offers *either* TextToSpeech (TTS), using the MikroE click
 board, or sound (generated by the Pico itself). Unfortunately, only
 one at a time is possible due to a shortage of GPIO pins on the Pico.
 
-Use the switch labeled `TTS or SOUND` to select either. A push to
-the `RESET` button is required for the new mode to become effective.
+Use the switch labeled `TTS or SOUND` to select either. A push to the
+`RESET` button is required for the new mode to become effective.
 
-The current audio mode is also indicated in the OLED display (using `TTS` or `SND` indicators): 
+The current audio mode is also indicated in the OLED display (using
+`TTS` or `SND` indicators):
 
 ![Display Sound](pics/disp1.jpg)
 
@@ -389,9 +412,9 @@ banks. Memory banks can be saved to SD card if required.
 
 ### SD Card
 
-Use a FAT32 formatted Micro SD Card. Note that `ERROR 2` will
-occur if PicoRAM is started without SD Card, or if the SD card
-is write protected, not properly formatted, or faulty.
+Use a FAT32 formatted Micro SD Card. Note that `ERROR 2` will occur if
+PicoRAM is started without SD Card, or if the SD card is write
+protected, not properly formatted, or faulty.
 
 ### OLED Status Display & Display Modes 
 
@@ -401,62 +424,123 @@ The PicoRAM OLED display looks as follows:
 
 The first line shows
 
-- the current memory bank number the PicoRAM is serving: `#0`. 
+- the current memory bank number the PicoRAM is serving: `#0`.
+
 - the current address of the Microtronic: `00`.
+
 - the current 12bit instruction word / op-code: `000`. 
-- the current audio mode: `SND`, `TTS-`, or `TTSE`. `SND` means sound output, else `TTS` is active. See the `TTS or SOUND` switch.
-  `TTSE` means "TTS Echo", i.e., everything printed to the OLED display is automatically sent to the TTS (and uttered when an end-of-line character, CR or LF, is sent). 
+
+- the current audio mode: `SND`, `TTS-`, or `TTSE`. `SND` means sound
+  output, else `TTS` is active. See the `TTS or SOUND` switch.  `TTSE`
+  means "TTS Echo", i.e., everything printed to the OLED display is
+  automatically sent to the TTS (and uttered when an end-of-line
+  character, CR or LF, is sent).
+
 - whether extended op-codes are enabled (`*`) or disabled (`-`). 
 
-The second line shows the current bank, address and instruction, but using mnemonics.
+The second line shows the current bank, address and instruction, but
+using mnemonics.
 
-The third line is shown when extended op-codes are enabled, and mostly usefull for single stepping and
-debugging. It shows the status and kind of currently executed / prepared extended op-code (i.e., op-code
-type and its arguments): 
+The third line is shown when extended op-codes are enabled, and mostly
+usefull for single stepping and debugging. It shows the status and
+kind of currently executed / prepared extended op-code (i.e., op-code
+type and its arguments):
 
 ![Display Ex-Op Codes Explanation](pics/disp2.jpg)
 
-The fourth line is used for file operations, or for displaying the Real Time Clock current time etc.
+The fourth line is used for file operations, or for displaying the
+Real Time Clock current time etc.
 
-**Note that the display has various modes, and when the Microtronic is actually running a program, it
-should usually be turned off!** The display mode can be changed using the `CANCEL` button.
+**Note that the display has various modes, and when the Microtronic is
+actually running a program, it should usually be turned off!** The
+display mode can be changed using the `CANCEL` button.
 
-It is important that the **display is switched off when a program with extended op-codes is running** -
-not only might the Microtronic program want to utilize the display for text or graphics output, but
-also from a performance point of view it can be critical to switch off the display so that the 2nd
-core does have all cycles available to implement the extended op-codes rather than spent time updating
-the display.
+It is important that the **display is switched off when a program with
+extended op-codes is running** - not only might the Microtronic
+program want to utilize the display for text or graphics output, but
+also from a performance point of view it can be critical to switch off
+the display so that the 2nd core does have all cycles available to
+implement the extended op-codes rather than spent time updating the
+display.
 
 Using the `CANCEL` button, the modes of the display are:
 
-- display off: this should be the default when the Microtronic is runnign a program with extended op-codes; updating the display requires cycles from the 2nd core which might then run at risk of running out of sync with the Microtronic. 
-- op-code display: first line only. 
-- op-code & mnemonics display: first and second line; the third line showing the extended op-codes status is displayed when extended op-codes are enabled. This should be the default for programm development and single stepping through and debugging of the Microtronic program.  
+- display off: this should be the default when the Microtronic is
+  runnign a program with extended op-codes; updating the display
+  requires cycles from the 2nd core which might then run at risk of
+  running out of sync with the Microtronic.
+
+- op-code display: first line only.
+
+- op-code & mnemonics display: first and second line; the third line
+  showing the extended op-codes status is displayed when extended
+  op-codes are enabled. This should be the default for programm
+  development and single stepping through and debugging of the
+  Microtronic program.
 
 ### User Interface Buttons 
 
 ![UI](pics/ui.jpg)
 
-The button legend list the button label and its **primary and secondary function.** The **primary function** corresponds to a short press of the button, and the **secondary function** is selected by a longer press of the button (i.e., about half a second).
+The button legend list the button label and its **primary and
+secondary function.** The **primary function** corresponds to a short
+press of the button, and the **secondary function** is selected by a
+longer press of the button (i.e., about half a second).
 
-The **button labels** are **indicative of the functions that these buttons play during file creation and file selection**: 
-- in file load mode (`UP` button) the `UP` and `DOWN` buttons are used to select a file from the list of files on the SD card. `OK` is used to confirm loading of the current file,  whereas `CANCEL` is used to abort the load process. 
-- in file save mode (`DOWN` button) the `UP` and `DOWN` buttons are used to select the next character of the filename under constructions. A short press of `NEXT/PREV` advances to the next character, and a longer press jumps back to the previous character. `OK` and `CANCEL` are self-explanatory. The buttons have analog functions for setting the real time clock (see secondary function of `CANCEL`). 
+The **button labels** are **indicative of the functions that these buttons play during file creation and file selection**:
 
-In a nutshell, the **primary functions of the buttons** are (if executed from the main loop / context of PicoRAM):
+- in file load mode (`UP` button) the `UP` and `DOWN` buttons are used
+  to select a file from the list of files on the SD card. `OK` is used
+  to confirm loading of the current file, whereas `CANCEL` is used to
+  abort the load process.
+
+- in file save mode (`DOWN` button) the `UP` and `DOWN` buttons are
+  used to select the next character of the filename under
+  constructions. A short press of `NEXT/PREV` advances to the next
+  character, and a longer press jumps back to the previous
+  character. `OK` and `CANCEL` are self-explanatory. The buttons have
+  analog functions for setting the real time clock (see secondary
+  function of `CANCEL`).
+
+In a nutshell, the **primary functions of the buttons** are (if
+executed from the main loop / context of PicoRAM):
 
 - `UP`: Load a memory dump from SD card, using the file selector. 
+
 - `DOWN`: Save a memory dump to SD card, using the file name creator.
-- `NEXT/PREV`: Increment the current active memory bank number by 1; 16 banks are available. These banks are pre-loaded with some program, see below for the list. The currently active memory bank can simply be erased using Microtronic's standard clear memory procedure: `HALT-PGM-5` (or `HALT-PGM-6` for `NOP` op-codes). Note that this only affects the currently active bank! But all banks are reset to default contents upon reset of the PicoRAM (`RESET` button or power cycle). 
-- `OK`: En-/disable extended op-codes. When extended op-codes are enabled, PicoRAM acts as a "co-processor" and the already discussed vacuous op-codes are utilized to drive the hardware extension, i.e., for sound, speech, text or graphics output, and bank switching. A `*` in the display status line (first line) indicates if op-code extensions are active or not. When active, and a program is run, the OLED display should always be in off mode.
-- `CANCEL`: toggle OLED display mode (off, op-code display, op-code & mnemonics display).
+
+- `NEXT/PREV`: Increment the current active memory bank number by 1;
+  16 banks are available. These banks are pre-loaded with some
+  program, see below for the list. The currently active memory bank
+  can simply be erased using Microtronic's standard clear memory
+  procedure: `HALT-PGM-5` (or `HALT-PGM-6` for `NOP` op-codes). Note
+  that this only affects the currently active bank! But all banks are
+  reset to default contents upon reset of the PicoRAM (`RESET` button
+  or power cycle).
+
+- `OK`: En-/disable extended op-codes. When extended op-codes are
+  enabled, PicoRAM acts as a "co-processor" and the already discussed
+  vacuous op-codes are utilized to drive the hardware extension, i.e.,
+  for sound, speech, text or graphics output, and bank switching. A
+  `*` in the display status line (first line) indicates if op-code
+  extensions are active or not. When active, and a program is run, the
+  OLED display should always be in off mode.
+
+- `CANCEL`: toggle OLED display mode (off, op-code display, op-code &
+  mnemonics display).
+
 
 The **secondary functions of the buttons** are (if execute from the main loop / context of PicoRAM): 
 
-- `UP`/`DOWN`: Test the audio output (either sound or speech, depending on the mode). 
+- `UP`/`DOWN`: Test the audio output (either sound or speech,
+  depending on the mode).
+
 - `DOWN`: List all the `.MIC` files on SD card.
+
 - `NEXT/PREV`: If in TTS mode, speak the current time of the RTC.
+
 - `OK`: Show the current time of the RTC on the OLED display.
+
 - `CANCEL`: Set the current time of the RTC using the OLED display.
 
 ## Pre-Loaded Memory Banks / Programs
@@ -494,25 +578,36 @@ These programs may change without notice.
 
 The standard operation sequence should look as follows:
 
-- load a memory dump from SD card using the `UP` button; select a `.MIC` file using `UP`, `DOWN`, and `OK` / `CANCEL`. 
+- load a memory dump from SD card using the `UP` button; select a
+  `.MIC` file using `UP`, `DOWN`, and `OK` / `CANCEL`.
+
 - set the Microtronic to address 00: `HALT-NEXT-00`.
+
 - disable the OLED display using the `CANCEL` button.
-- ensure that extended op-codes are enabled: hit the `OK` button until `OP-EXT ON (*)` is shown.
+
+- ensure that extended op-codes are enabled: hit the `OK` button until
+  `OP-EXT ON (*)` is shown.
+
 - start the Microtronic program: `HALT-NEXT-00-RUN`.
-- important: **when the Microtronic program has finished, DISABLE extended op-codes!**
 
-The last step is imporant because some of the extended op-codes may require banking-in of temporary,
-auxiliary program fragments. If the program is interrupted whilst interrupting one of these
-banked-in "helper" programs, then the Microtronic will appear to have a lost its original
-memory content. When this happens, and you don't find your program in memory, simply disable
-extended op-codes until (hit `OK` until `OP-EXT OFF (-)` is shown), and set the Microtronic monitor
-to a well-defined address: `HALT-NEXT-00`. Your program will immediately appear again, as the original
-user program bank has been restored.
+- important: **when the Microtronic program has finished, DISABLE
+  extended op-codes, else you will see weird behavior in the
+  Microtronic monitor if the extended op-codes are still enabled!**
 
-Note that your program will also "disappear" if you hit the `NEXT/PREV`
-buttons accidentially, i.e., the current memory bank has
+The last step is imporant because some of the extended op-codes may
+require banking-in of temporary, auxiliary program fragments. If the
+program is interrupted whilst interrupting one of these banked-in
+"helper" programs, then the Microtronic will appear to have a lost its
+original memory content. When this happens, and you don't find your
+program in memory, simply disable extended op-codes until (hit `OK`
+until `OP-EXT OFF (-)` is shown), and set the Microtronic monitor to a
+well-defined address: `HALT-NEXT-00`. Your program will immediately
+appear again, as the original user program bank has been restored.
+
+Note that your program will also "disappear" if you hit the
+`NEXT/PREV` buttons accidentially, i.e., the current memory bank has
 changed. Simply re-select your program's original memory bank by
-toggling through the 16 banks until the original bank is restored. 
+toggling through the 16 banks until the original bank is restored.
 
 ## Example Programs
 
@@ -531,14 +626,15 @@ Firmware sources soon.
 
 ## Assembly Notes
 
-The Microtronic's 2114 SRAM socket must be replaced by a standard (ideally, machined) DIP socket:
+The Microtronic's 2114 SRAM socket must be replaced by a standard
+(ideally, machined) DIP socket:
 
 ![SRAM Socket](pics/socket.jpg)
 
 ![DIP Socket](pics/dipsocket.jpg)
 
-Moreover, the `R12 (DISP)` line requires a pin-connector - there is a via 
-on the Microtronic PCB which can be used for this: 
+Moreover, the `R12 (DISP)` line requires a pin-connector - there is a
+via on the Microtronic PCB which can be used for this:
 
 ![R12 Via](pics/r12via.jpg)
 
@@ -546,9 +642,11 @@ The modified Microtronic PCB should look as follows then:
 
 ![PicoRAM 5](pics/picoram5.jpg)
  
-PicoRAM is easy to assemble; everything is through-hole, and off-the-shelf modules are used.
+PicoRAM is easy to assemble; everything is through-hole, and
+off-the-shelf modules are used.
 
-I recommend to use a machined DIP socket for the ribbon wire cable connector: 
+I recommend to use a machined DIP socket for the ribbon wire cable
+connector:
 
 ![PicoRAM 4](pics/picoram4.jpg)
 ![PicoRAM 5](pics/picoram5.jpg)
@@ -585,21 +683,28 @@ I recommend to use a machined DIP socket for the ribbon wire cable connector:
 ----------------------------------------------------------------------------------------------------------------------
 
 For SW, SW2, SW6, note that the common pin of these switches needs to
-be in the middle! The Blue and Gray switches from Amazon are
-different - get the Gray ones!
+be in the middle! The Blue and Gray switches from Amazon are different
+- get the Gray ones!
 
 Moreover, I am using [Mounting
 Feet](https://www.amazon.com/gp/product/B07DHHS1Q8) and crimpable
-18-pin DIP rectangule cable assembly connectors (hard to find!).
-But ordinary DuPont cables will also do. 
+18-pin DIP rectangule cable assembly connectors (hard to find!).  But
+ordinary DuPont cables will also do.
 
 ## Ackknowledgements
 
-- Harry Fairhead for his [execellent book](https://www.amazon.com/gp/product/1871962056)
-- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill, ATmegas and Arduinos,
-and for helping to get started and troubleshooting! 
+- Harry Fairhead for his [execellent
+  book](https://www.amazon.com/gp/product/1871962056)
+
+- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill,
+ATmegas and Arduinos, and for helping to get started and
+troubleshooting!
+
 - The authors of the libraries I am using:
-  - Carl J Kugler III carlk3: [https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico](https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico)
+
+  - Carl J Kugler III carlk3:
+    [https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico](https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico)
+
   - Raspberry Pi Foundation for the `ssd1306_i2c.c` demo.
 
 
@@ -609,4 +714,5 @@ Dedicated to my late father, Rudolf Wessel (26.12.1929 - 15.10.2023).
 
 R.I.P, Papa - I will always fondly remember the days following
 Christmas 1983 for which you and Mom got me the Microtronic, and we
-entered the dauntingly big "Lunar Lander" program together. In loving memory! 
+entered the dauntingly big "Lunar Lander" program together. In loving
+memory!
