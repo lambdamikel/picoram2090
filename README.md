@@ -162,25 +162,16 @@ instruction word is the following:
 	      if ( (adr & adr3 ) == adr4) {                    
 ```
 
-where `adr` is the current address on the address bus,
-and  
-
-```
-      adr4 = adr3;   
-      adr3 = adr2; 
-      adr2 = adr1; 
-      adr1 = adr; 
-``` 
-
-is an "address window" of the last four addresses.
+where `adr` is the current address on the address bus, and ``adr4`` to
+``adr`` are the last four addresses that have been seen on the
+address bus. 
 
 If the Pico detects such a sequence of addresses on the address bus,
-then this is a necessary condition for the Microtronic to access the
-12bit instruction at address `adr4`.
-
-Note that the three 4bit 2114 SRAM words that make up the 12bit
-Microtronic word are not at consecutive addresses in the 2114 SRAM,
-but utilize a set bit 8 and 9.
+then this the Microtronic has fetched a 12bit instruction starting at
+Microtronic memory address `adr4 & 0xFF`. Note that three 4bit
+2114 SRAM words that make up the 12bit Microtronic word are not at
+consecutive locations in the 2114 SRAM, but instead utilize set bits 8 and 9
+to group the three 4bit words into on 12bit word. 
 
 Unfortunately, his mechanism does not work for the address `00`.
 Moreover, there are still "false positives" that are caused by display
