@@ -1,13 +1,12 @@
 # PicoRAM 2090
 
-A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card Interface,
-and Multi-Expansion for the [Busch 2090 Microtronic Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
+A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card
+Interface, and Multi-Expansion for the [Busch 2090 Microtronic
+Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ![PicoRAM 1](pics/picoram1.jpg)
 
 ![PicoRAM 2](pics/picoram2.jpg)
-
-![Microtronic](pics/microtronic.jpg)
 
 ## History of the Project  
 
@@ -25,9 +24,17 @@ videos](https://www.youtube.com/playlist?list=PLvdXKcHrGqhd8HcGb5lirYrgMoVZjP5XO
 
 The project got covered by a number of sites: 
 
-- [Hackaday: Pi Pico Becomes SRAM For 1981 Educational Computer](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/) ![Hackaday Coverage](pics/hackaday2.jpg)
-- [Hackster: Michael Wessel Turns a Raspberry Pi Pico Into an Add-On for the Four-Bit Busch 2090 Microtronic SBC](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) ![Hackster Coverage](pics/hackster.jpg)
-- [PiShop Blog: Pi Pico Becomes SRAM for 1981 Educational Computer](https://blog.pishop.co.za/pi-pico-becomes-sram-for-1981-educational-computer/)
+- [Hackaday: Pi Pico Becomes SRAM For 1981 Educational
+  Computer](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/)
+  ![Hackaday Coverage](pics/hackaday2.jpg)
+
+- [Hackster: Michael Wessel Turns a Raspberry Pi Pico Into an Add-On
+  for the Four-Bit Busch 2090 Microtronic
+  SBC](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd)
+  ![Hackster Coverage](pics/hackster.jpg)
+
+- [PiShop Blog: Pi Pico Becomes SRAM for 1981 Educational
+  Computer](https://blog.pishop.co.za/pi-pico-becomes-sram-for-1981-educational-computer/)
 
 
 ## About
