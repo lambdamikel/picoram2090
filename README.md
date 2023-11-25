@@ -380,7 +380,7 @@ one at a time is possible due to a shortage of GPIO pins on the Pico.
 Use the switch labeled `TTS or SOUND` to select either. A push to
 the `RESET` button is required for the new mode to become effective.
 
-The current audio mode (`SND or TTS`) is also indicated in the OLED display:
+The current audio mode is also indicated in the OLED display (using `TTS` or `SND` indicators): 
 
 ![Display Sound](pics/disp1.jpg)
 
@@ -409,7 +409,7 @@ The first line shows
 - the current memory bank number the PicoRAM is serving: `#0`. 
 - the current address of the Microtronic: `00`.
 - the current 12bit instruction word / op-code: `000`. 
-- the current audio mode: `SND`, `TTS-`, or `TTSE`. `SND` means sound output, else `TTS` is active. See the `SOUND or TTS` switch.
+- the current audio mode: `SND`, `TTS-`, or `TTSE`. `SND` means sound output, else `TTS` is active. See the `TTS or SOUND` switch.
   `TTSE` means "TTS Echo", i.e., everything printed to the OLED display is automatically sent to the TTS (and uttered when an end-of-line character, CR or LF, is sent). 
 - whether extended op-codes are enabled (`*`) or disabled (`-`). 
 
