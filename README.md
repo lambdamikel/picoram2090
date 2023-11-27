@@ -368,7 +368,7 @@ bytes, in little endian order (a sequence of two nibbles: `<LOW>,
 <HIGH>`).  Moreover, all graphics coordinates `X,Y,X1,X2,Y1,Y2` are
 bytes and require 2 nibbles each. In contrast, `TX, TY` are text
 display cursor location (text screen column / row coordinates), and
-only require a single nibble (`<LOW>`), or two nibbles (`<LOW>,
+only require a single nibble (`<LOW>`), or two nibbles (`<LOW>`,
 `<LOW'>`) each:
 
 ---------------------------------------------------------------------------------------------
