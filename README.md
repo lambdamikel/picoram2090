@@ -272,7 +272,7 @@ program. Instead, registers have to be used as program-writeable
 memory.
 
 In order to feed the contents of a *register as an operand / argument
-to an extended op-code**, e.g., say to *play note number `x` in
+to an extended op-code*, e.g., say to *play note number `x` in
 register 0*, we need a special trick. The problem here is that PicoRAM
 does not have access to the register memory, as Microtronic registers
 are stored directly on the TMS1600 chip, not on the 2114! **So how can
