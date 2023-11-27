@@ -371,29 +371,29 @@ display cursor location (text screen column / row coordinates), and
 only require a single nibble (`<LOW>`), or two nibbles (`<LOW>`,
 `<LOW'>`) each:
 
----------------------------------------------------------------------------------------------
-| Op-Code | # Operand / Argument Nibbles | Explanation                                      |
-|---------|------------------------------|--------------------------------------------------|
-| `0xx`   | 0                            | Enter Literal Data Nibble `x`                    |
-| `3Fx`   | 0                            | Enter Data Nibble from Register `x`              |
-| `500`   | 0                            | Hexadecimal Data Entry Mode                      | 
-| `501`   | 0                            | Decimal Data Entry Mode                          |  
-| `502`   | 0                            | Clear OLED Display                               |
-| `503`   | 0                            | Auto or manual OLED display updates              | 
-| `504`   | 0                            | Refresh OLED Display                             | 
-| `505`   | 1                            | Display Clear Line <LOW>                         | 
-| `506`   | 2                            | Display Show ASCII Character <CHAR>              | 
-| `507`   | 1                            | Display Set Cursor at Line <TY>                  |  
-| `508`   | 2                            | Display Set Cursor at Pos <TX> <TY>              | 
-| `509`   | 4                            | Display Plot <LOW><HIGH> (=X) <LOW'><HIGH'> (=Y) |
-| `50A`   | 8                            | Display Line <X1>,<Y1> <X2>,<Y2>                 |
-| `50B`   | 4                            | Display Line From - <X>,<Y>                      |
-| `50C`   | 4                            | Display Line To <X>,<Y> -                        | 
-| `50D`   | 2                            | Play Note <OCTAVE> <NOTE> (Sound Model Only)     | 
-| `50E`   | 0                            | Enable TTS Display Echo                          | 
-| `50F`   | 1                            | Send <CHAR> to TTS (Speech Mode Only)            | 
-| `70x`   | 1                            | Select Memory Bank `x`                           | 
----------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
+| Op-Code | # Operand / Argument Nibbles | Explanation                                          |
+|---------|------------------------------|------------------------------------------------------|
+| `0xx`   | 0                            | Enter Literal Data Nibble `x`                        |
+| `3Fx`   | 0                            | Enter Data Nibble from Register `x`                  |
+| `500`   | 0                            | Hexadecimal Data Entry Mode                          | 
+| `501`   | 0                            | Decimal Data Entry Mode                              |  
+| `502`   | 0                            | Clear OLED Display                                   |
+| `503`   | 0                            | Auto or manual OLED display updates                  | 
+| `504`   | 0                            | Refresh OLED Display                                 | 
+| `505`   | 1                            | Display Clear Line `<LOW>`                           | 
+| `506`   | 2                            | Display Show ASCII Character `<CHAR>`                | 
+| `507`   | 1                            | Display Set Cursor at Line `<TY>`                    |  
+| `508`   | 2                            | Display Set Cursor at Pos `<TX><TY>`                 | 
+| `509`   | 4                            | Display Plot `<LOW><HIGH>` (=X) `<LOW'><HIGH'>` (=Y) |
+| `50A`   | 8                            | Display Line `<X1><Y1><X2><Y2>`                      |
+| `50B`   | 4                            | Display Line From `<X><Y>`                           |
+| `50C`   | 4                            | Display Line To `<X><Y>`                             | 
+| `50D`   | 2                            | Play Note `<OCTAVE><NOTE>`    (Sound Model Only)     | 
+| `50E`   | 0                            | Enable TTS Display Echo                              | 
+| `50F`   | 1                            | Send `<CHAR>` to TTS (Speech Mode Only)              | 
+| `70x`   | 1                            | Select Memory Bank `x`                               | 
+-------------------------------------------------------------------------------------------------
 
 Please have a look at the provided [example programs](software/).
 
