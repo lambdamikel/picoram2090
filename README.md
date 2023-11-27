@@ -7,6 +7,8 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 [Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
 
+[Full Feature Demonstration (Breadboard Prototype)](https://youtu.be/U6LDjYz8LTk?feature=shared)
+
 ![PicoRAM 2](pics/picoram2.jpg)
 
 ![PicoRAM 1](pics/picoram1.jpg)
@@ -81,6 +83,8 @@ It offers:
 ## Demo Videos
 
 [Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
+
+[Full Feature Demonstration (Breadboard Prototype)](https://youtu.be/U6LDjYz8LTk?feature=shared)
 
 ## Theory of Operation
 
