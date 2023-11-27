@@ -5,6 +5,8 @@ A Raspberry Pi Pico (RP2040)-based 2114 SRAM Emulator, SD Card
 Interface, and Multi-Expansion for the [Busch 2090 Microtronic
 Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
+[Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
+
 ![PicoRAM 2](pics/picoram2.jpg)
 
 ![PicoRAM 1](pics/picoram1.jpg)
@@ -78,10 +80,7 @@ It offers:
 
 ## Demo Videos
 
-[YouTube Breadboard Prototype Demo](https://youtu.be/U6LDjYz8LTk) 
-
-[YouTube Final PCB Demo](https://youtu.be/U6LDjYz8LTk)  
-
+[Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
 
 ## Theory of Operation
 
@@ -812,7 +811,7 @@ ordinary DuPont cables will also do.
 - Harry Fairhead for his [execellent
   book](https://www.amazon.com/gp/product/1871962056)
 
-- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill,
+- Hans HÃ¼bner (aka Pengo) for motivating me to abandon the BluePill,
 ATmegas and Arduinos, and for helping to get started and
 troubleshooting!
 
