@@ -122,7 +122,7 @@ and presents the content of its "C memory array" on the 4 data lines
 as reactively as possible.
 
 Luckily, for the mere purpose of SRAM emulation, it is not necessary
-to distinguish the "real SRAM" accesses from accesses from the ones
+to distinguish the "real SRAM" accesses from the ones
 resulting from driving the display and scanning the keyboard - the
 2114 is actually presenting data for these addresses as well, but the
 Microtronic firmware just ignores them (it obviously knows whether it
