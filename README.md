@@ -7,6 +7,8 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 [Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
 
+[Full Feature Demonstration (Breadboard Prototype)](https://youtu.be/U6LDjYz8LTk?feature=shared)
+
 ![PicoRAM 2](pics/picoram2.jpg)
 
 ![PicoRAM 1](pics/picoram1.jpg)
@@ -93,6 +95,8 @@ It offers:
 
 [Final YouTube Demo Video](https://youtu.be/dFnKhUI47KU?feature=shared)
 
+[Full Feature Demonstration (Breadboard Prototype)](https://youtu.be/U6LDjYz8LTk?feature=shared)
+
 ## Theory of Operation
 
 ### 2114 SRAM Emulation 
@@ -133,7 +137,7 @@ and presents the content of its "C memory array" on the 4 data lines
 as reactively as possible.
 
 Luckily, for the mere purpose of SRAM emulation, it is not necessary
-to distinguish the "real SRAM" accesses from accesses from the ones
+to distinguish the "real SRAM" accesses from the ones
 resulting from driving the display and scanning the keyboard - the
 2114 is actually presenting data for these addresses as well, but the
 Microtronic firmware just ignores them (it obviously knows whether it
