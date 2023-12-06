@@ -11,6 +11,17 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ![PicoRAM 1](pics/picoram1.jpg)
 
+## Latest News
+
+### December 4th 2023
+
+Mr. Jörg Vallen of Busch was so kind to include links to my [PicoRAM
+2090](https://github.com/lambdamikel/picoram2090) as well as the
+[Busch 2090 Arduino
+Emulator](https://github.com/lambdamikel/Busch-2090) repositories on
+the [Busch Microtronic main
+page.](https://www.busch-modell.de/information/Microtronic-Computer.aspx)
+
 ## History of the Project  
 
 PicoRAM 2090 started out as [a simple project to emulate the
