@@ -826,7 +826,7 @@ ordinary DuPont cables will also do.
 - Harry Fairhead for his [execellent
   book](https://www.amazon.com/gp/product/1871962056)
 
-- Hans HÃ¼bner (aka Pengo) for motivating me to abandon the BluePill,
+- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill,
 ATmegas and Arduinos, and for helping to get started and
 troubleshooting!
 
