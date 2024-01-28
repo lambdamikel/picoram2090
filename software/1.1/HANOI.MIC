@@ -1,0 +1,249 @@
+# tower of Hanoi - recursive - work for up to 4 disks!
+# (C) 2024 LambdaMikel
+# Work with PicoRAM 2019 PGM1 Reader
+# 
+
+00:fo8
+01:f0e
+02:f1f
+03:fff
+04:f02
+05:1ae # A -> source
+06:1cd # C -> dest
+07:1bc # B -> spare 
+08:f0e
+
+09:11f # move "return marker 1" top top of return stack (F); marker 1 -> 0b
+0a:c0d # goto hanoi(n, source, dest, spare); "recursive" call 
+
+# end 
+
+0b:f60 # stop 
+0c:f00
+
+### hanoi(n, source, dest, spare) @0d 
+
+## f = 01?
+
+0d:f0e # swap in value stack 
+0e:91f 
+0f:D15 
+
+## = 01; base case 
+
+10:f3d
+11:ff0 # this doesn't destroy the value stack, as only 8-f has been swapped in!
+12:f02 
+13:f0e # swap back normal registers 
+14:cb0 # goto jumpblock  ; return
+
+## > 01; rec call and add 
+
+# create 4 value stack entries
+
+15:f0e # restore normal registers 
+16:b70 # shift value stack down
+17:b70 
+18:b70 
+19:b70 
+
+# swap in upper bank to put values on value stack
+# for first rec. call:
+# FUNCTION MoveTower(disk, source, dest, spare):
+# MoveTower(disk - 1, source, spare, dest)   // Step 1 above
+
+1a:f0e # swap in upper values bank 
+1b:0bf # copy "n" value 
+1c:71f # sub 1 from n -> n-1 
+1d:0ae # source -> source
+1e:09c # dest -> spare 
+1f:08d # spare -> dest 
+20:f0e 
+
+21:b50 # shift return stack down 
+22:12f # -> move "return marker 2" top top of return stack (F); "marker 2 -> 24"
+
+# parameters were prepared, do the call
+
+23:c0d # goto sum(n);  recursive call
+
+24:b60 # shift return stack up 
+25:b90 # shift value stack up
+26:b90
+27:b90
+28:b90
+
+# output
+# move disk from source to dest              // Step 2 above
+
+29:f0e
+2a:f3d 
+2b:ff0
+2c:f02
+2d:f0e 
+
+#
+# prepare 2nd recursive call 
+# 
+
+2e:b70 # shift value stack down
+2f:b70 
+30:b70 
+31:b70 
+
+# swap in upper bank to put values on value stack
+# for second rec. call:
+# FUNCTION MoveTower(disk, source, dest, spare):
+# MoveTower(disk - 1, spare, dest, source)   // Step 3 above
+
+32:f0e # swap in upper values bank 
+33:0bf # copy "n" value 
+34:71f # sub 1 from n -> n-1 
+35:08e # spare -> source
+36:09d # dest -> dest  
+37:0ac # source -> spare  
+38:f0e 
+
+39:b50 # shift return stack down 
+3a:13f # -> move "return marker 3" top top of return stack (F); "marker 3 -> 3c"
+
+# parameters were prepared, do the call
+
+3b:c0d # goto sum(n);  recursive call
+
+3c:b60 # shift return stack up 
+3d:b90 # shift value stack up
+3e:b90
+3f:b90
+40:b90
+
+41:cb0 # goto jumpblock  ; return 
+
+###
+
+# return stack shift down: 
+
+50:098
+51:0a9
+52:0ba
+53:0cb
+54:0dc
+55:0ed
+56:0fe
+57:f07 
+
+#### 
+
+# return stack shift up: 
+
+60:0ef
+61:0de
+62:0cd 
+63:0bc
+64:0ab
+65:09a
+66:089 
+67:f07 
+
+####
+
+# value stack shift down: 
+
+70:f0d
+71:f0e 
+72:010
+73:021
+74:032
+75:043
+76:054
+77:065
+78:076
+79:087
+7a:098
+7b:0a9
+7c:0ba
+7d:0cb
+7e:0dc
+7f:0ed
+80:0fe 
+81:f0e
+82:f0d 
+83:f07 # ret 
+
+#### 
+
+# value stack shift up: 
+
+90:f0d
+91:f0e 
+92:0ef
+93:0de
+94:0cd
+95:0bc
+96:0ab
+97:09a
+98:089
+99:078
+9a:067
+9b:056
+9c:045
+9d:034
+9e:023
+9f:012
+a0:001
+a1:f0e
+a2:f0d 
+a3:f07 # ret 
+
+###
+
+# jump block
+
+b0:91f # marker 1 ?
+b1:E0b # goto 0A
+b2:92f # marker 2 ?
+b3:E24 # goto 24
+b4:93f # marker 3 ?
+b5:E3c # goto 3c
+b6:F00 # error
+
+#---------------
+#
+#Test run with 3 disks: 
+#
+#A B C
+#-----
+#1
+#2
+#3
+#-----
+#
+#2
+#3   1
+#-----
+#
+#
+#3 2 1
+#-----
+#
+#  1
+#3 2
+#-----
+#
+#  1
+#  2 3
+#-----
+#
+#
+#1 2 3
+#-----
+#
+#    2
+#1   3
+#-----
+#    1
+#    2
+#    3
+#-----
+# 
+#7 Steps

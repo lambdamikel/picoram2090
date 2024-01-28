@@ -1,0 +1,24 @@
+# test of comments 
+# one more 
+
+20:f60 # test
+21:510
+22:001
+23:002
+24:003
+25:004
+26:005
+27:fe0 # nice blinkenlights!
+28:c20
+
+@40
+f30
+510
+521
+532
+fe0
+fe1
+fe2
+c40
+
+

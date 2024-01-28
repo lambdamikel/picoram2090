@@ -15,6 +15,28 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ## Latest News
 
+### January 28th 2024
+
+Firmware update - [version 1.1](firmware/1.1/). Still need to update 
+the [source code folder](picoram_2090/).
+
+Version 1.1 brings an improved `.MIC` file reader. It is now possible
+to specify the address, use lower case hex characters, and the reader
+accepts common typos (e.g., `o -> 0`). Have a look at this [example
+file that demonstrates the extended `.MIC`
+format](software/1.1/TEST.MIC). The file format is particularly useful
+if you are developing Microtronic programs on the PC.
+
+There is also a new interesting demo programs: a *recursive*
+implementation of the infamous text-book example, [towers of
+Hanoi](software/1.1/HANOI.MIC). This works for up to 4 disks. I
+emulated the stack using the 2nd register bank and shift operations,
+and also implemented a return stack, using integer labels and
+conditional branching. This is a fully general pattern for
+implementing recursion on the Microtronic. Obviously, the "emulated"
+stack is limited, but still useful and surprising, as [towers of
+Hanoi](software/1.1/HANOI.MIC) demonstrates.
+
 ### December 4th 2023
 
 Mr. Jörg Vallen of Busch was so kind to include links to my [PicoRAM
