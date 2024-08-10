@@ -1,7 +1,6 @@
-# tower of Hanoi - recursive - work for up to 4 disks!
+# Towers of Hanoi - recursive - works for up to 4 disks!
 # (C) 2024 LambdaMikel
-# Work with PicoRAM 2019 PGM1 Reader
-# 
+# MIC file can be read by PicoRAM 2090, Firmware v1.1 
 
 00:fo8
 01:f0e
