@@ -15,6 +15,21 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ## Latest News
 
+### August 10th 2024
+
+[PicoRAM 2090 won the "Grand Prize" in the RetroChallenge
+2023/10!](https://www.retrochallenge.org/2024/08/rc-202310-results.html#more)
+Thanks much, guys - it's the project that I am most proud of, and I
+feel very honored that it got recognized with the renown and reputable
+"RetroChallenge Grand Prize Winner" label. After all, the
+RetroChallenge gave us fantastic retro computer projects such as the
+RC2014. 
+
+![RetroChallenge 2023/10 - 1](pics/retrochallenge2.jpg) 
+![RetroChallenge 2023/10 - 2](pics/retrochallenge.jpg) 
+
+## Older News
+
 ### January 28th 2024
 
 Firmware update - [version 1.1](firmware/1.1/). Still need to update 
