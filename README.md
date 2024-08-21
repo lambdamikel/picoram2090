@@ -15,6 +15,12 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ## Latest News
 
+### August 20th 2024
+
+[New assembly & demo video by "Mein Elektronik Hobby" (in German)!}(https://youtu.be/267T5BnslIs)
+
+![Mein Elektronik Hobby](pics/mein-elektronik-hobby.jpg) 
+
 ### August 10th 2024
 
 [PicoRAM 2090 won the "Grand Prize" in the RetroChallenge
