@@ -17,7 +17,7 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ### August 20th 2024
 
-[New assembly & demo video by "Mein Elektronik Hobby" (in German)!}(https://youtu.be/267T5BnslIs)
+[New assembly & demo video by "Mein Elektronik Hobby" (in German)!](https://youtu.be/267T5BnslIs)
 
 ![Mein Elektronik Hobby](pics/mein-elektronik-hobby.jpg) 
 
