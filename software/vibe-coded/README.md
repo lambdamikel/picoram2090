@@ -100,6 +100,32 @@ previous columns kept in spare registers, positions fed to the cursor via the `3
 op), so play is fast and flicker-free. One bank, exactly 256 words. See
 `blockade/PICO_BLOCKADE_GFX_README.txt`.
 
+## LUNAR LANDER  (`lander/`)
+
+The odd one out - **not a port of an existing Microtronic program, but a wholly
+original game designed from scratch** by the AI (Claude) for this hardware.
+
+It's the *turn-based* Lunar Lander - the 1969 original form, which is the right
+fit for a machine that blocks on a keypress. Each turn you read the gauges and
+punch in one key = your engine burn. Gravity adds to your downward speed every
+turn; thrust bleeds it off but spends fuel. Touch down at velocity 2 or less and
+"THE EAGLE HAS LANDED"; faster, and it's "CRASH". It uses the whole machine at
+once - a cockpit split with the **red LED as the instruments** (`ALT VEL FUEL`)
+and the **OLED as the window**: the lander descending to the surface, a thrust
+flame beneath it when you burn, a smoking crater if you come in hot, and TTS for
+the verdict.
+
+```
+  ALT high          burning            touchdown          crash
+   A                 A                                     ____
+                     V                                    *X*
+   ____            ____             ____ A ____        ____ ____
+```
+
+Pure-integer physics, the ground drawn once per game and only the lander+flame
+moved each turn (the fast redraw), one bank (172 words). Assembly source included
+(`lander/lander.asm`). See `lander/PICO_LANDER_README.txt`.
+
 ---
 
 ## Dev support  (`dev-support/`)
