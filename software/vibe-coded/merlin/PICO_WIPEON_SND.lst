@@ -1,0 +1,266 @@
+PicoRAM Wipe On - graphical 3x3 Merlin/Lights-Out style puzzle with sound.
+Goal: switch all 9 cells ON. Press 1-9 to apply the given toggle mask. Press 0 for a new puzzle.
+One bank; no PicoRAM firmware changes; no nested CALL/RET.
+
+Register allocation:
+  R0 top row bits, R1 middle row bits, R2 bottom row bits
+  R3 key input / note number, R4 move counter
+  R5/R6/R7 row masks for current key
+  R8/R9 scratch for drawing and XOR toggle
+  RD/RE/RF random start rows and delay counters
+
+Toggle masks, row bit values: left=1, middle=2, right=4
+  1: 3,3,0
+  2: 7,0,0
+  3: 6,6,0
+  4: 1,1,1
+  5: 2,7,2
+  6: 4,4,4
+  7: 0,3,3
+  8: 0,0,7
+  9: 0,6,6
+
+00: CE7  GOTO STARTCLR  INIT:      clear regs+OLED once, then build puzzle
+01: F05  RND                       RND -> R_D,R_E,R_F
+02: 37D  ANDI 7,D                  R_D &= 7
+03: 37E  ANDI 7,E                  R_E &= 7
+04: 37F  ANDI 7,F                  R_F &= 7
+05: 0D0  MOV D,0                   R0 = R_D top row
+06: 0E1  MOV E,1                   R1 = R_E middle row
+07: 0F2  MOV F,2                   R2 = R_F bottom row
+08: 970  CMPI 7,0                  is top row already 7?
+09: E0B  BRZ 0B                    if yes check row 1
+0A: C12  GOTO 12                   otherwise draw
+0B: 971  CMPI 7,1       ALL7A:     is middle row already 7?
+0C: E0E  BRZ 0E                    if yes check row 2
+0D: C12  GOTO 12                   otherwise draw
+0E: 972  CMPI 7,2       ALL7B:     is bottom row already 7?
+0F: E11  BRZ 11                    if all rows are 7, make it unsolved
+10: C12  GOTO 12                   otherwise draw
+11: 101  MOVI 0,1       FIXALL:    R1 = 0 so starting board is not already solved
+12: F14  DISP 1,4       REDRAW:    LED display: move counter R4
+13: 909  CMPI 0,9                  (no-op; per-move OLED clear removed -> overwrite)
+14: 508  OLED CURSOR               OLED cursor x=4, y=0
+15: 055  TX 5 (center MERLIN)
+16: 000  lit 0                     TY 0
+17: 506  OLED CHAR 'M'
+18: 0DD  low D
+19: 044  high 4
+1A: 506  OLED CHAR 'E'
+1B: 055  low 5
+1C: 044  high 4
+1D: 506  OLED CHAR 'R'
+1E: 022  low 2
+1F: 055  high 5
+20: 506  OLED CHAR 'L'
+21: 0CC  low C
+22: 044  high 4
+23: 506  OLED CHAR 'I'
+24: 099  low 9
+25: 044  high 4
+26: 506  OLED CHAR 'N'
+27: 0EE  low E
+28: 044  high 4
+29: 506  OLED CHAR ' '
+2A: 000  low 0
+2B: 022  high 2
+2C: 508  OLED CURSOR               OLED cursor x=6, y=1
+2D: 066  lit 6                     TX 6
+2E: 011  lit 1                     TY 1
+2F: 008  MOV 0,8                   R8 = top row
+30: B9C  CALL 9C                   draw top row
+31: 508  OLED CURSOR               OLED cursor x=6, y=2
+32: 066  lit 6                     TX 6
+33: 022  lit 2                     TY 2
+34: 018  MOV 1,8                   R8 = middle row
+35: B9C  CALL 9C                   draw middle row
+36: 508  OLED CURSOR               OLED cursor x=6, y=3
+37: 066  lit 6                     TX 6
+38: 033  lit 3                     TY 3
+39: 028  MOV 2,8                   R8 = bottom row
+3A: B9C  CALL 9C                   draw bottom row
+3B: 504  OLED REFRESH              OLED refresh
+3C: 50D  PLAY NOTE                 PicoRAM play note stop tone
+3D: 000  lit 0                     octave 0
+3E: 000  lit 0                     note 0
+3F: 970  CMPI 7,0                  top row == 7?
+40: E42  BRZ 42                    yes: check middle
+41: C48  GOTO 48                   no: wait for key
+42: 971  CMPI 7,1       CHK1:      middle row == 7?
+43: E45  BRZ 45                    yes: check bottom
+44: C48  GOTO 48                   no: wait
+45: 972  CMPI 7,2       CHK2:      bottom row == 7?
+46: EBB  BRZ BB                    yes: victory melody
+47: C48  GOTO 48                   no: wait
+48: FF3  KIN 3          WAIT:      wait for key into R3
+49: 903  CMPI 0,3       WAITKEY:   key 0 -> cell 7 (bottom-left)
+4A: E76  BRZ 76                    KEY7
+4B: 913  CMPI 1,3                  key 1 -> cell 8
+4C: E7A  BRZ 7A                    KEY8
+4D: 923  CMPI 2,3                  key 2 -> cell 9
+4E: E7E  BRZ 7E                    KEY9
+4F: 943  CMPI 4,3                  key 4 -> cell 4
+50: E6A  BRZ 6A                    KEY4
+51: 953  CMPI 5,3                  key 5 -> cell 5
+52: E6E  BRZ 6E                    KEY5
+53: 963  CMPI 6,3                  key 6 -> cell 6
+54: E72  BRZ 72                    KEY6
+55: 983  CMPI 8,3                  key 8 -> cell 1 (top-left)
+56: E5E  BRZ 5E                    KEY1
+57: 993  CMPI 9,3                  key 9 -> cell 2
+58: E62  BRZ 62                    KEY2
+59: 9A3  CMPI A,3                  key A -> cell 3
+5A: E66  BRZ 66                    KEY3
+5B: 9F3  CMPI F,3                  key F -> new puzzle
+5C: E00  BRZ 00
+5D: C48  GOTO 48                   ignore other keys
+5E: 135  MOVI 3,5       KEY1:      mask top = 3
+5F: 136  MOVI 3,6                  mask middle = 3
+60: 107  MOVI 0,7                  mask bottom = 0
+61: C82  GOTO 82                   apply mask
+62: 175  MOVI 7,5       KEY2:      mask top = 7
+63: 106  MOVI 0,6                  mask middle = 0
+64: 107  MOVI 0,7                  mask bottom = 0
+65: C82  GOTO 82                   apply mask
+66: 165  MOVI 6,5       KEY3:      mask top = 6
+67: 166  MOVI 6,6                  mask middle = 6
+68: 107  MOVI 0,7                  mask bottom = 0
+69: C82  GOTO 82                   apply mask
+6A: 115  MOVI 1,5       KEY4:      mask top = 1
+6B: 116  MOVI 1,6                  mask middle = 1
+6C: 117  MOVI 1,7                  mask bottom = 1
+6D: C82  GOTO 82                   apply mask
+6E: 125  MOVI 2,5       KEY5:      mask top = 2
+6F: 176  MOVI 7,6                  mask middle = 7
+70: 127  MOVI 2,7                  mask bottom = 2
+71: C82  GOTO 82                   apply mask
+72: 145  MOVI 4,5       KEY6:      mask top = 4
+73: 146  MOVI 4,6                  mask middle = 4
+74: 147  MOVI 4,7                  mask bottom = 4
+75: C82  GOTO 82                   apply mask
+76: 105  MOVI 0,5       KEY7:      mask top = 0
+77: 136  MOVI 3,6                  mask middle = 3
+78: 137  MOVI 3,7                  mask bottom = 3
+79: C82  GOTO 82                   apply mask
+7A: 105  MOVI 0,5       KEY8:      mask top = 0
+7B: 106  MOVI 0,6                  mask middle = 0
+7C: 177  MOVI 7,7                  mask bottom = 7
+7D: C82  GOTO 82                   apply mask
+7E: 105  MOVI 0,5       KEY9:      mask top = 0
+7F: 166  MOVI 6,6                  mask middle = 6
+80: 167  MOVI 6,7                  mask bottom = 6
+81: C82  GOTO 82                   apply mask
+82: CDB  GOTO APPLY2     APPLY:     crisp key beep, then silent toggle/redraw
+83: C85  (dead) GOTO 85
+84: C85  (dead) GOTO 85
+85: 008  MOV 0,8                   R8 = R0
+86: F88  INV 8                     R8 = ~R8
+87: 258  AND 5,8                   R8 = R8 & R5
+88: 059  MOV 5,9                   R9 = R5
+89: F89  INV 9                     R9 = ~R9
+8A: 290  AND 9,0                   R0 = R0 & R9
+8B: A80  OR 8,0                    R0 = R0 | R8
+8C: 018  MOV 1,8                   R8 = R1
+8D: F88  INV 8                     R8 = ~R8
+8E: 268  AND 6,8                   R8 = R8 & R6
+8F: 069  MOV 6,9                   R9 = R6
+90: F89  INV 9                     R9 = ~R9
+91: 291  AND 9,1                   R1 = R1 & R9
+92: A81  OR 8,1                    R1 = R1 | R8
+93: 028  MOV 2,8                   R8 = R2
+94: F88  INV 8                     R8 = ~R8
+95: 278  AND 7,8                   R8 = R8 & R7
+96: 079  MOV 7,9                   R9 = R7
+97: F89  INV 9                     R9 = ~R9
+98: 292  AND 9,2                   R2 = R2 & R9
+99: A82  OR 8,2                    R2 = R2 | R8
+9A: 514  ADDI 1,4                  move counter++
+9B: C12  GOTO 12                   redraw after move
+9C: 089  MOV 8,9        DRAWROW:   R9 = R8 for bit 1
+9D: 319  ANDI 1,9                  R9 &= 1
+9E: EA3  BRZ A3                    if 0 print dot
+9F: 506  OLED CHAR                 OLED char 'O'
+A0: 0FF  lit F                     arg low F
+A1: 044  lit 4                     arg high 4
+A2: CA6  GOTO A6                   next cell
+A3: 506  OLED CHAR      DROFF1:    OLED char '.'
+A4: 0EE  lit E                     arg low E
+A5: 022  lit 2                     arg high 2
+A6: 089  MOV 8,9        DRCELL2:   R9 = R8 for bit 2
+A7: 329  ANDI 2,9                  R9 &= 2
+A8: EAD  BRZ AD                    if 0 print dot
+A9: 506  OLED CHAR                 OLED char 'O'
+AA: 0FF  lit F                     arg low F
+AB: 044  lit 4                     arg high 4
+AC: CB0  GOTO B0                   next cell
+AD: 506  OLED CHAR      DROFF2:    OLED char '.'
+AE: 0EE  lit E                     arg low E
+AF: 022  lit 2                     arg high 2
+B0: 089  MOV 8,9        DRCELL3:   R9 = R8 for bit 4
+B1: 349  ANDI 4,9                  R9 &= 4
+B2: EB7  BRZ B7                    if 0 print dot
+B3: 506  OLED CHAR                 OLED char 'O'
+B4: 0FF  lit F                     arg low F
+B5: 044  lit 4                     arg high 4
+B6: F07  RET                       RET from DRAWROW
+B7: 506  OLED CHAR      DROFF3:    OLED char '.'
+B8: 0EE  lit E                     arg low E
+B9: 022  lit 2                     arg high 2
+BA: F07  RET                       RET from DRAWROW
+BB: 50D  PLAY NOTE      WIN:       PicoRAM play note win C
+BC: 044  lit 4                     octave 4
+BD: 011  lit 1                     note 1
+BE: BD0  CALL D0                   delay
+BF: 50D  PLAY NOTE                 PicoRAM play note win E
+C0: 044  lit 4                     octave 4
+C1: 055  lit 5                     note 5
+C2: BD0  CALL D0                   delay
+C3: 50D  PLAY NOTE                 PicoRAM play note win G
+C4: 044  lit 4                     octave 4
+C5: 088  lit 8                     note 8
+C6: BD0  CALL D0                   delay
+C7: 50D  PLAY NOTE                 PicoRAM play note win high C
+C8: 055  lit 5                     octave 5
+C9: 011  lit 1                     note 1
+CA: BD0  CALL D0                   delay
+CB: 50D  PLAY NOTE                 PicoRAM play note stop tone
+CC: 000  lit 0                     octave 0
+CD: 000  lit 0                     note 0
+CE: FF3  KIN 3                     wait for any key
+CF: C00  GOTO 00                   new puzzle
+D0: 11E  MOVI 1,E       DELAY:     outer = 1  (melody ~19x faster)
+D1: 1CF  MOVI C,F       DLO1:      inner = 12
+D2: 71F  SUBI 1,F       DLO2:      R_F--
+D3: 90F  CMPI 0,F                  R_F == 0?
+D4: ED6  BRZ D6                    inner loop done
+D5: CD2  GOTO D2                   inner loop
+D6: 71E  SUBI 1,E       DLO1END:   R_E--
+D7: 90E  CMPI 0,E                  R_E == 0?
+D8: EDA  BRZ DA                    done
+D9: CD1  GOTO D1                   outer loop
+DA: F07  RET            DRET:      RET from DELAY
+
+
+APPLY2 - short key beep: play note, brief delay (R_F=5 ~0.4s @ ~50Hz; tunable),
+mute, then GOTO the toggle. Played up front so it is independent of the slow redraw.
+DB: 50D  PLAY NOTE     APPLY2:    key tone
+DC: 044  octave 4
+DD: 055  note 5 (fixed; every key incl. 0 beeps)
+DE: 15F  MOVI 5,F                 R_F = 5  (short delay)
+DF: 71F  SUBI 1,F      A2LOOP:    R_F--
+E0: 90F  CMPI 0,F
+E1: EE3  BRZ E3
+E2: CDF  GOTO DF                  delay loop
+E3: 50D  PLAY NOTE     A2MUTE:    mute tone
+E4: 000  octave 0
+E5: 000  note 0
+E6: C85  GOTO 85                  into the toggle (then normal REDRAW)
+
+
+STARTCLR - clear registers and OLED once per game, then fall into INIT.
+E7: F08  CLEAR         STARTCLR:  clear registers
+E8: 502  OLED CLEAR               clear screen (once, not every move)
+E9: C01  GOTO 01                  continue INIT (RND, build board)
+
+Last used address: E9
+CALL/RET audit: REDRAW is reached by GOTO, not CALL. It calls DRAWROW three times, and DRAWROW contains no CALL. WIN is reached by GOTO/BRZ after all row calls have returned; it calls DELAY, and DELAY contains no CALL.

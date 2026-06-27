@@ -59,6 +59,38 @@ RC2014.
 ![RetroChallenge 2023/10 - 1](pics/retrochallenge2.jpg) 
 ![RetroChallenge 2023/10 - 2](pics/retrochallenge.jpg) 
 
+## New Vibe-Coded Programs
+
+A small collection of brand-new games for the Microtronic + PicoRAM,
+**vibe-coded** - written entirely in Microtronic machine code in conversation
+with an AI (Anthropic's Claude) and debugged iteratively on real hardware. They
+use only existing PicoRAM extended op-codes (**no firmware changes**), and they
+push the hardware further than anything before.
+
+![Tic-Tac-Toe on the PicoRAM OLED](software/vibe-coded/titato.jpg)
+
+The two-bank **human-first Tic-Tac-Toe** is, as far as we can tell, the **first
+PicoRAM program to combine OLED graphics, TTS speech, SRAM bank-switching, and a
+real game AI all at once** - the board-scanning AI lives in one bank and the
+display + speech in another, handed back and forth across a tiny `70x` stub, so
+neither half has to fit in 256 words alone. And both Tic-Tac-Toe games appear to
+be the **first working tic-tac-toe for the Microtronic at all**: the 1981 Busch
+manual listing had never been correctly turned into a running program.
+
+- **MERLIN** - a graphical 3x3 Merlin / Lights-Out puzzle, with key beeps and a victory melody.
+- **MERLIN 2** - MERLIN plus a selectable move budget (difficulty) and a "ran out of moves" loss with a sad melody.
+- **Tic-Tac-Toe, computer-first** - the authentic 58-word Busch look-ahead strategy in OLED graphics + speech; it does not lose.
+- **Tic-Tac-Toe, human-first** - you go first against a from-scratch tactical AI (wins 350 / draws 127 / loses only 12 of 489 lines, all forks), split across **two SRAM banks** so graphics + speech + AI fit together.
+
+The programs, their `.asm` sources, and the dev tools - a Microtronic
+**assembler** and a **two-bank simulator** that renders the OLED and captures the
+speech so a whole game can be played off-device - are in
+[`software/vibe-coded/`](software/vibe-coded/), with full write-ups and the
+hard-won hardware notes (the `70x` prefetch handoff, the async-`50x` wait, the
+no-borrow compare carry).
+
+*Vibe-coded in collaboration with Anthropic's Claude (Claude Code), June 2026.*
+
 ## Older News
 
 ### January 28th 2024
@@ -85,7 +117,7 @@ Hanoi](software/1.1/HANOI.MIC) demonstrates.
 
 ### December 4th 2023
 
-Mr. Jörg Vallen of Busch was so kind to include links to my [PicoRAM
+Mr. Jï¿½rg Vallen of Busch was so kind to include links to my [PicoRAM
 2090](https://github.com/lambdamikel/picoram2090) as well as the
 [Busch 2090 Arduino
 Emulator](https://github.com/lambdamikel/Busch-2090) repositories on
@@ -894,7 +926,7 @@ ordinary DuPont cables will also do.
 - Harry Fairhead for his [execellent
   book](https://www.amazon.com/gp/product/1871962056)
 
-- Hans Hübner (aka Pengo) for motivating me to abandon the BluePill,
+- Hans Hï¿½bner (aka Pengo) for motivating me to abandon the BluePill,
 ATmegas and Arduinos, and for helping to get started and
 troubleshooting!
 
