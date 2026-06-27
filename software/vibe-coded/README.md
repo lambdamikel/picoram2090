@@ -118,10 +118,10 @@ flame beneath it when you burn, a smoking crater if you come in hot, and TTS for
 the verdict.
 
 ```
-  ALT high          burning            touchdown          crash
-   A                 A                                     ____
-                     V                                    *X*
-   ____            ____             ____ A ____        ____ ____
+  descending      burning      landed       crashed
+       A             A
+                     V
+   _________     _________    ____A____    ___*X*___
 ```
 
 Pure-integer physics, the ground drawn once per game and only the lander+flame
