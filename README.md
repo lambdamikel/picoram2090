@@ -24,8 +24,8 @@ firmware changes). The two-bank **human-first Tic-Tac-Toe** is the first PicoRAM
 program to combine OLED graphics, TTS speech, SRAM bank-switching, and a real
 board-scanning AI all at once, and - together with its computer-first sibling -
 appears to be the first working tic-tac-toe for the Microtronic ever. Also: a
-graphical **MERLIN** (Lights-Out) puzzle and a **MERLIN 2** with selectable
-difficulty. Programs, `.asm` sources, write-ups, and a two-bank simulator are in
+graphical **MERLIN** (Lights-Out) puzzle, a **MERLIN 2** with selectable
+difficulty, and a numbered-lane **BLOCKADE**. Programs, `.asm` sources, write-ups, and a two-bank simulator are in
 [`software/vibe-coded/`](software/vibe-coded/) - see the
 [New Vibe-Coded Programs](#new-vibe-coded-programs) section below.
 
@@ -108,6 +108,7 @@ manual listing had never been correctly turned into a running program.
 - **MERLIN 2** - MERLIN plus a selectable move budget (difficulty) and a "ran out of moves" loss with a sad melody.
 - **Tic-Tac-Toe, computer-first** - the authentic 58-word Busch look-ahead strategy in OLED graphics + speech; it does not lose.
 - **Tic-Tac-Toe, human-first** - you go first against a from-scratch tactical AI (wins 350 / draws 127 / loses only 12 of 489 lines, all forks), split across **two SRAM banks** so graphics + speech + AI fit together.
+- **BLOCKADE** - the two-track Nim-style strategy game from the 2094 "Computerspiele" booklet, with numbered OLED lanes and "YOU WIN" / "I WIN" speech; authentic Busch logic, fast flicker-free incremental redraw.
 
 The programs, their `.asm` sources, and the dev tools - a Microtronic
 **assembler** and a **two-bank simulator** that renders the OLED and captures the

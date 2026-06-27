@@ -80,6 +80,26 @@ bank 0 and B1 into bank 1, set TTS mode, start at address 00. Keypad block
 simpler single-bank LED-only variant (`PICO_TITATO_HF.MIC`). See
 `tic-tac-toe-human-first/PICO_TITATO_HF_2BANK_README.txt`.
 
+## BLOCKADE  (`blockade/`)
+
+![BLOCKADE on the PicoRAM OLED](blockade/blockade.jpg)
+
+The two-track strategy game from the Busch 2094 "Computerspiele" booklet, given an
+OLED makeover. Two lanes - Bahn 1 (fields 1-A) and Bahn 2 (fields 1-5) - each with a
+computer piece (O) and yours (X) starting at opposite ends; a move is the lane number
+then the target field, and you win by leaving equal gaps on both lanes (a Nim-style
+game the first player can always win). The OLED draws each lane as its row of field
+numbers with the pieces beneath, so you read the target field and watch the gaps
+close; it speaks "YOU WIN" / "I WIN" at the end.
+
+The game logic (00-87) is the **authentic Busch listing**, transcribed and verified
+word-for-word against `anl2094.pdf` - an earlier GPT "graphical" version had the right
+core but a broken OLED wrapper, so only the wrapper was redone. It draws the static
+lane numbers **once** and then only erases/redraws the four pieces each move (their
+previous columns kept in spare registers, positions fed to the cursor via the `3Fx`
+op), so play is fast and flicker-free. One bank, exactly 256 words. See
+`blockade/PICO_BLOCKADE_GFX_README.txt`.
+
 ---
 
 ## Dev support  (`dev-support/`)
