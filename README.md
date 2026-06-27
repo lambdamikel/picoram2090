@@ -15,6 +15,22 @@ Computer System from 1981](https://github.com/lambdamikel/Busch-2090).
 
 ## Latest News
 
+### June 26th 2026
+
+A first for the PicoRAM: a set of brand-new **vibe-coded** games - written
+entirely in Microtronic machine code in conversation with an AI (Anthropic's
+Claude) and debugged on real hardware, using only existing PicoRAM op-codes (no
+firmware changes). The two-bank **human-first Tic-Tac-Toe** is the first PicoRAM
+program to combine OLED graphics, TTS speech, SRAM bank-switching, and a real
+board-scanning AI all at once, and - together with its computer-first sibling -
+appears to be the first working tic-tac-toe for the Microtronic ever. Also: a
+graphical **MERLIN** (Lights-Out) puzzle and a **MERLIN 2** with selectable
+difficulty. Programs, `.asm` sources, write-ups, and a two-bank simulator are in
+[`software/vibe-coded/`](software/vibe-coded/) - see the
+[New Vibe-Coded Programs](#new-vibe-coded-programs) section below.
+
+![Tic-Tac-Toe on the PicoRAM OLED](software/vibe-coded/titato.jpg)
+
 ### October 3rd 2025
 
 I have written an article about the Busch Microtronic and its
