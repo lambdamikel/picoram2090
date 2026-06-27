@@ -102,6 +102,8 @@ op), so play is fast and flicker-free. One bank, exactly 256 words. See
 
 ## LUNAR LANDER  (`lander/`)
 
+![LUNAR LANDER on the Microtronic + PicoRAM](lander/lander.jpg)
+
 The odd one out - **not a port of an existing Microtronic program, but a wholly
 original game designed from scratch** by the AI (Claude) for this hardware.
 
