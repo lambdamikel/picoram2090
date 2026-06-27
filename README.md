@@ -31,6 +31,17 @@ difficulty. Programs, `.asm` sources, write-ups, and a two-bank simulator are in
 
 ![Tic-Tac-Toe on the PicoRAM OLED](software/vibe-coded/titato.jpg)
 
+### June 24th 2026
+
+My two German LOAD articles on the educational computers of the 1980s - the
+**Busch Microtronic**, the **Kosmos CP1**, and the **Philips MasterLab** - are now
+available in English. Anthropic's Claude produced the English translation and a
+revised, combined all-in-one edition: it merges LOAD #10 and #11 into a single
+piece, updated with 2025-2026 developments, with a print-ready PDF and faithful
+per-article translations. Read it here:
+**[Educational Computers in Germany in the
+1980s](https://github.com/lambdamikel/german-educational-computers-of-the-80s)**.
+
 ### October 3rd 2025
 
 I have written an article about the Busch Microtronic and its
