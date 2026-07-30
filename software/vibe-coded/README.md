@@ -1,8 +1,9 @@
 # New Vibe-Coded Programs
 
-A small collection of brand-new games for the Busch Microtronic 2090 + PicoRAM,
-**vibe-coded** - written entirely in Microtronic machine code in conversation
-with an AI (Anthropic's Claude), and debugged iteratively on real hardware.
+A small collection of brand-new games and demos for the Busch Microtronic 2090 +
+PicoRAM, **vibe-coded** - written entirely in Microtronic machine code in
+conversation with an AI (Anthropic's Claude), and debugged iteratively on real
+hardware.
 
 They push the PicoRAM further than anything before them. In particular, the
 two-bank **human-first Tic-Tac-Toe** is - as far as we can tell - the **first
@@ -130,6 +131,44 @@ moved each turn (the fast redraw), one bank (172 words). Assembly source include
 
 ---
 
+## Demos
+
+Not games - two looping showpieces that lean on the same PicoRAM tricks, and (in
+the clock's case) on *beating* one of its nastiest timing gotchas.
+
+## MICRONET 2  (`micronet-2/`)
+
+A self-restarting take on the classic **MICRONET** demo: the diagonal net drawn
+line-by-line on the OLED, then "MICROTRONIC" spelled across the top band and
+**spoken** by the TTS (set PicoRAM to TTS mode). The 1981 original ends in a
+program-stop and must be restarted by hand; MICRONET 2 admires its finished
+screen for a few seconds, wipes, and weaves the whole net again - forever, ideal
+for an exhibit table. The full 6-digit red LED stays lit throughout (`F60`): two
+digits track the net's top/bottom anchors as it draws, four are a running
+"lines woven" counter - and the **DOT output LEDs blink** the whole time (a
+binary count of the line counter while drawing, the pause countdown while it
+rests). One bank, 84 words, no firmware changes. Includes `micronet2.asm`. See
+`micronet-2/PICO_MICRONET2_README.txt`.
+
+## VECTOR CLOCK  (`vector-clock/`)
+
+A big-digit wall clock, and the collection's first use of the PicoRAM's
+**battery-buffered real-time clock**. The red LED shows the live time HH MM SS;
+press a key and the OLED draws HH:MM as four large **vector 7-segment digits**
+(each segment a real drawn line, not a text glyph) with a colon. It's a
+"confirmed read" design - you only ever draw a time you've just watched tick on
+the LED - which neatly sidesteps the PicoRAM's trickiest gotcha: the
+**asynchronous `F06` RTC-load** rewrites RAM under the running CPU and disarms on
+a race, so the instruction after `F06` can be mis-served. The clock beats it in a
+single bank by laying a long **NOP runway** across the detour's `0x20-0x30`
+scratch zone, putting the `KIN` wait *past* that zone (so the screen-clear can
+never fire before a keypress), and looping back with `GOTO 01` (the PicoRAM can't
+serve a jump to address `00`). Rock-solid, no flicker; display-only for now
+(spoken time may come later). Includes `clock1.asm`. See
+`vector-clock/PICO_CLOCK1_README.txt`.
+
+---
+
 ## Dev support  (`dev-support/`)
 
 The tools used to build and verify all of the above - a Microtronic **assembler**
@@ -155,3 +194,11 @@ A few non-obvious things these programs discovered, in case you build your own:
   `3Fx` is a global CPU-hijack (only safe as a `50x` arg).
 * The OLED is **128x32**; text cells are 8x8, so characters land on 8-pixel rows
   and `print_char` upper-cases (no lowercase glyphs). Lines are true pixels.
+* **`F06` (load RTC) is an async detour**: the Pico rewrites RAM under the running
+  CPU to inject the six BCD time digits (`RA`=sec1 .. `RF`=hour10) using a fixed
+  `0x20-0x30` scratch zone, then jumps back to `F06+1` and disarms on the *next
+  address change* - a race. Keep the instruction after `F06` and that scratch zone
+  as harmless no-ops, and put any blocking `KIN` **well past `0x30`**, or the KIN
+  can be skipped / the next op served from the wrong bank.
+* **A jump to address `00` isn't served** - treat `00` as the power-on entry only
+  and loop back to `01` (`C01`, never `C00`).
