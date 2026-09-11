@@ -35,11 +35,11 @@ data lines (`IO/1` to `IO/4`).
 
 - 10/8/2023: Thanks to Hackaday's [Robin Kearey](https://hackaday.com/author/robinkearey/) for covering the project - [great article!](https://hackaday.com/2023/09/10/pi-pico-becomes-sram-for-1981-educational-computer/)
 
-![Hackaday 1](pics/hackaday1.jpg)
-![Hackaday 2](pics/hackaday2.jpg)
+  ![Hackaday 1](pics/hackaday1.jpg)
+  ![Hackaday 2](pics/hackaday2.jpg)
 
 - 9/8/2023: Thanks to Hackster.io for [this tweet](https://www.hackster.io/news/michael-wessel-turns-a-raspberry-pi-pico-into-an-add-on-for-the-four-bit-busch-2090-microtronic-sbc-c21abaff56bd) - nice!
-![Hackster Tweet](pics/hackster.jpg) 
+  ![Hackster Tweet](pics/hackster.jpg) 
 
 
 ## Hardware Setup 
@@ -59,7 +59,7 @@ special (white) socket, so the chip is easily spotted:
 I recommend replacing this socket with a standard DIP socket so that
 the PicoRAM 2090 can be connected more easily. I simply used DuPont
 cables and a standard (machined) IC 18pin DIP socket; DuPont cables
-plug in very firmly and permantely into these.
+plug in very firmly and permanently into these.
 
 ![DIP Socket](pics/dipsocket.jpg)
 
@@ -147,14 +147,14 @@ point when the project is ripe, and the planned features (see below)
 have been implemented. It's going to be a real product, eventually.
 
 I feel much more comfortable with the voltage dividers in place
-now. This should protect the Pico sufficently.
+now. This should protect the Pico sufficiently.
 
 
 ## Firmware
 
 Checkout
 [https://github.com/raspberrypi/pico-setup-windows](https://github.com/raspberrypi/pico-setup-windows/tree/master);
-*Visual Studio Code (VSCode)* for Rasperry Pi Pico. This installation
+*Visual Studio Code (VSCode)* for Raspberry Pi Pico. This installation
 includes a set of Pico examples. Copy the files from the [`src`
 directory](./src) into a directory `sram` to your
 `pico-examples`. Also add the `add_subdirectory(sram)` to the global

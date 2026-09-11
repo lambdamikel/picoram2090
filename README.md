@@ -716,7 +716,7 @@ Using the `CANCEL` button, the modes of the display are:
 - **Op-code & mnemonics display:** first and second line. The third
   line showing the extended op-codes status is only displayed when
   extended op-codes are enabled. This should be the default for
-  programm development, single stepping, and debugging of Microtronic
+  program development, single stepping, and debugging of Microtronic
   programs.
 
 ### User Interface Buttons 
@@ -925,7 +925,7 @@ connector (these crimp connectors are hard to come by, btw):
 | RN1, RN2      | 20k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                               |
 | RN5           | 1k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                                |
 | RN6           | 2k Ohm Isolated Resistor Network (DIP-16 W=7.62 mm)                                                |
-| RV1           | 101 (100 Ohm) Potentiomer / Trimmer                                                                |
+| RV1           | 101 (100 Ohm) Potentiometer / Trimmer                                                                |
 | SW1, SW2, SW6 | [DPDT 8.5 mm Switch (GRAY, NOT BLUE!!)](https://www.amazon.com/dp/B081VB7LY2)                      |
 | D1, D2        | 3.0 mm LEDs                                                                                        |
 | J5            |[Stereo Socket](https://www.amazon.com/gp/product/B077D1NY4T)                                       |
@@ -953,7 +953,7 @@ ordinary DuPont cables will also do.
 
 ## Acknowledgements 
 
-- Harry Fairhead for his [execellent
+- Harry Fairhead for his [excellent
   book](https://www.amazon.com/gp/product/1871962056)
 
 - Hans H�bner (aka Pengo) for motivating me to abandon the BluePill,
